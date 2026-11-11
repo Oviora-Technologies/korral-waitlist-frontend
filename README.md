@@ -19,6 +19,12 @@ The shared header checks the server session using `GET /api/auth/me`. Visitors s
 
 `/dashboard` and `/manage/community/:slug` / `/manage/group/:slug` are protected at the client entry point. Visitors without a valid session are redirected to `/login?next=<requested-page>`. The Express endpoints also enforce ownership on the server; client-side route protection alone does not authorize access to private data.
 
+## Reverse proxy and rate limiting
+
+The React development proxy may send `X-Forwarded-For` headers. Express is configured with `app.set('trust proxy', env.trustedProxies)` so `express-rate-limit` can use the correct client IP.
+
+By default, `TRUSTED_PROXY_IPS=loopback` trusts **only** proxies on `127.0.0.1/8` and `::1`. This is appropriate for local Create React App development. For a production host (Render, nginx, etc.), explicitly configure `TRUSTED_PROXY_IPS` to the **actual known proxy IP/subnet(s)**; if there are no trusted proxies, review whether this setting is needed. Do not set `trust proxy` to `true` or broadly trust every IP: it may let clients spoof their rate-limit identity.
+
 ## Shared layout
 
 The homepage's header and footer now live in `client/src/components/SiteLayout.tsx`. They're rendered by `App.tsx` on **all pages**, including signup, login, creator dashboard, organization creation and group/community details.
