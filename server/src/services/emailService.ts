@@ -44,7 +44,8 @@ async function send(message: Message): Promise<boolean> {
   const user = process.env.EMAIL_USER;
   const password = process.env.EMAIL_PASS;
   if (!host || !user || !password) {
-    console.warn('Skipping VILA confirmation email: EMAIL_HOST/EMAIL_USER/EMAIL_PASS not configured');
+    const missing = [!host && 'EMAIL_HOST', !user && 'EMAIL_USER', !password && 'EMAIL_PASS'].filter(Boolean).join(', ');
+    console.error(`[VILA email] Not sent to ${message.to}: missing ${missing} in server/.env`);
     return false;
   }
   try {
@@ -57,7 +58,7 @@ async function send(message: Message): Promise<boolean> {
       greetingTimeout: 10000,
       socketTimeout: 10000,
     });
-    await transport.sendMail({
+    const result = await transport.sendMail({
       from: process.env.EMAIL_FROM || `"VILA" <${user}>`,
       to: message.to,
       subject: message.subject,
@@ -65,9 +66,22 @@ async function send(message: Message): Promise<boolean> {
       html: template(message),
       attachments: [{ filename: 'vila-logo.png', path: logoPath, cid: 'vila-logo', contentDisposition: 'inline' }],
     });
-    return true;
+    const accepted = (result.accepted || []).map(address => String(address).toLowerCase());
+    const ok = accepted.includes(message.to.trim().toLowerCase());
+    if (ok) {
+      console.info(`[VILA email] SMTP accepted ${message.to}. Message ID: ${result.messageId}`);
+    } else {
+      console.error(`[VILA email] SMTP did not accept ${message.to}. Rejected recipients: ${(result.rejected || []).length}`);
+    }
+    return ok;
   } catch (error) {
-    console.error('VILA confirmation email could not be delivered:', error instanceof Error ? error.message : 'Unknown SMTP error');
+    const failure = error as Error & { code?: string; responseCode?: number; command?: string };
+    console.error('[VILA email] SMTP send failed:', {
+      code: failure.code || 'UNKNOWN',
+      responseCode: failure.responseCode,
+      command: failure.command,
+      message: failure.message,
+    });
     return false;
   }
 }
@@ -99,5 +113,18 @@ export function sendOrganizationCreatedEmail({ name, email, type, organizationNa
     message: `You have successfully created the ${type} "${organizationName}" on VILA. You are its creator and administrator. Share the invitation link below to welcome people to your ${type}. You can sign in with your email and password to manage registrations.`,
     actionText: 'Share your invitation',
     actionUrl: appUrl(invitePath),
+  });
+}
+
+/** Local-only CLI helper; never expose this as a public API endpoint. */
+export async function sendTestEmail(recipient: string) {
+  return send({
+    to: recipient,
+    name: 'VILA tester',
+    subject: 'VILA SMTP test — confirmation email',
+    heading: 'Your VILA email is working!',
+    message: 'This test confirms the VILA backend submitted a branded email to your SMTP provider. If you can read this message, email delivery is working.',
+    actionText: 'Visit VILA',
+    actionUrl: appUrl('/'),
   });
 }
