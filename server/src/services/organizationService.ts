@@ -8,7 +8,7 @@ export type OrganizationInput = {
   slug: string;
   description: string;
   location: { country: string; stateProvince: string; address: string };
-  creator: { fullName: string; email: string; phone: string; password: string };
+  creator?: { fullName: string; email: string; phone: string; password: string };
 };
 
 /**
@@ -17,11 +17,13 @@ export type OrganizationInput = {
  * Basic compensation is used for standalone local MongoDB instances.
  * A production deployment should use a MongoDB transaction and email verification.
  */
-export async function createCommunityOrGroup(input: OrganizationInput) {
+export async function createCommunityOrGroup(input: OrganizationInput, signedInUserId?: ObjectId, existingToken?: string) {
   const { creator, type, name, slug, description, location } = input;
-  const passwordHash = await hashPassword(creator.password);
+  if (!signedInUserId && !creator) throw new Error('Creator details are required');
+  const passwordHash = creator && !signedInUserId ? await hashPassword(creator.password) : undefined;
   const now = new Date();
-  let userId: ObjectId | undefined;
+  let userId: ObjectId | undefined = signedInUserId;
+  let newlyCreatedUser = false;
   let organizationId: ObjectId | undefined;
 
   try {
@@ -33,18 +35,22 @@ export async function createCommunityOrGroup(input: OrganizationInput) {
       throw error;
     }
 
-    const userResult = await db.collection('registrations').insertOne({
-      name: creator.fullName,
-      fullName: creator.fullName,
-      email: creator.email,
-      phone: creator.phone,
-      passwordHash,
-      source: { type: 'direct' },
-      consentedAt: now,
-      status: 'pending',
-      createdAt: now
-    });
-    userId = userResult.insertedId;
+    if (!signedInUserId && creator) {
+      const userResult = await db.collection('registrations').insertOne({
+        name: creator.fullName,
+        fullName: creator.fullName,
+        email: creator.email,
+        phone: creator.phone,
+        passwordHash,
+        source: { type: 'direct' },
+        consentedAt: now,
+        status: 'pending',
+        createdAt: now
+      });
+      userId = userResult.insertedId;
+      newlyCreatedUser = true;
+    }
+    if (!userId) throw new Error('Creator not found');
 
     const orgResult = await db.collection('organizations').insertOne({
       type,
@@ -69,12 +75,12 @@ export async function createCommunityOrGroup(input: OrganizationInput) {
       organizationId: organizationId.toHexString(),
       userId: userId.toHexString(),
       type, name, slug, description, location,
-      sessionToken: await createSession(userId),
+      sessionToken: existingToken || await createSession(userId),
       adminStatus: 'pending_verification'
     };
   } catch (error) {
     if (organizationId) await db.collection('organizations').deleteOne({ _id: organizationId }).catch(() => {});
-    if (userId) await db.collection('registrations').deleteOne({ _id: userId }).catch(() => {});
+    if (newlyCreatedUser && userId) await db.collection('registrations').deleteOne({ _id: userId }).catch(() => {});
     throw error;
   }
 }
