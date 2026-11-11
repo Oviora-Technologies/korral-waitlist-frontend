@@ -11,7 +11,7 @@ type HeaderProps = {
 export function Header({ authenticated, authChecking, loggingOut, onLogout }: HeaderProps) {
   const [open, setOpen] = useState(false);
   return <header className="topbar page-container">
-    <a className="wordmark" href="/" aria-label="VILA home"><span className="brand-symbol">v<span className="brand-dot">.</span></span><span>vila<span className="accent">.</span></span></a>
+    <a className="wordmark" href="/" aria-label="VILA home"><img className="brand-image" src="/vila-logo.png" alt="" /><span>vila<span className="accent">.</span></span></a>
     <nav className={open ? 'toplinks open' : 'toplinks'} aria-label="Main navigation">
       <a href="/#why-vila">Why VILA</a>
       <a href="/#how-it-works">How it works</a>
@@ -28,7 +28,7 @@ export function Header({ authenticated, authChecking, loggingOut, onLogout }: He
 
 export function Footer() {
   return <footer className="footer page-container">
-    <a className="wordmark" href="/"><span className="brand-symbol">v<span className="brand-dot">.</span></span><span>vila<span className="accent">.</span></span></a>
+    <a className="wordmark" href="/"><img className="brand-image" src="/vila-logo.png" alt="" /><span>vila<span className="accent">.</span></span></a>
     <p>Made for the places we call home.</p>
     <span>© {new Date().getFullYear()} VILA. All rights reserved.</span>
   </footer>;
