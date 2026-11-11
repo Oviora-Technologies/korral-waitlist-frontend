@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { MongoClient } from 'mongodb';
 const [type,name,slug] = process.argv.slice(2);
 if (!['community','group'].includes(type) || !name || !slug || !/^[a-z0-9-]+$/.test(slug)) {
-  console.error('Usage: npm run add:org -w server -- community "Abuloma" abuloma');
+  console.error('Usage: npm run add:org -- community "Abuloma" abuloma');
   process.exit(1);
 }
 async function main(){
