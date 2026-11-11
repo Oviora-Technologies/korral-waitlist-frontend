@@ -82,3 +82,11 @@
   .vila-app-layout .toplinks .top-join{justify-content:center}
   .vila-app-layout .mobile-menu{display:block}
 }
+
+/* Shared navigation: creator login/logout states */
+.vila-app-layout .toplinks .header-logout{font:700 13px 'DM Sans',sans-serif;color:#1e293b;background:transparent;border:0;padding:10px 0;cursor:pointer}
+.vila-app-layout .toplinks .header-logout:hover{color:#eb5757}
+.vila-app-layout .toplinks .header-logout:disabled{opacity:.55;cursor:wait}
+.dashboard-heading-link{color:#2d9cdb;font-size:13px;font-weight:800;text-decoration:none}
+.dashboard-heading-link:hover{text-decoration:underline}
+@media(max-width:1160px){.vila-app-layout .toplinks .header-logout{width:100%;display:flex;align-items:center;text-align:left;padding:12px 14px;font-size:13px}}
