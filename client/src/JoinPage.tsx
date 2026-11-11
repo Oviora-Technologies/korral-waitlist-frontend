@@ -48,7 +48,7 @@ export default function JoinPage() {
   }
 
   return <div className="waitlist-screen">
-    <header className="waitlist-header"><a className="waitlist-logo" href="/">vila<span>.</span></a><a className="back-link" href="/">← Back to home</a></header>
+    <header className="waitlist-header"><a className="waitlist-logo" href="/">vila<span>.</span></a><nav className="registration-nav"><a href="/create">Create community or group</a><a className="back-link" href="/">← Home</a></nav></header>
     <main className="waitlist-main">
       <div className="waitlist-story">
         <div className="mini-label">VILA · EARLY ACCESS</div>
