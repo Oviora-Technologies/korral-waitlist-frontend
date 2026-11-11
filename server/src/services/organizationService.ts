@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { db } from '../config/database';
+import { hashPassword, createSession } from './authService';
 
 export type OrganizationInput = {
   type: 'community' | 'group';
@@ -8,7 +8,7 @@ export type OrganizationInput = {
   slug: string;
   description: string;
   location: { country: string; stateProvince: string; address: string };
-  creator: { fullName: string; email: string; phone: string };
+  creator: { fullName: string; email: string; phone: string; password: string };
 };
 
 /**
@@ -19,8 +19,7 @@ export type OrganizationInput = {
  */
 export async function createCommunityOrGroup(input: OrganizationInput) {
   const { creator, type, name, slug, description, location } = input;
-  const managementToken = randomBytes(32).toString('hex');
-  const managementTokenHash = createHash('sha256').update(managementToken).digest('hex');
+  const passwordHash = await hashPassword(creator.password);
   const now = new Date();
   let userId: ObjectId | undefined;
   let organizationId: ObjectId | undefined;
@@ -39,6 +38,7 @@ export async function createCommunityOrGroup(input: OrganizationInput) {
       fullName: creator.fullName,
       email: creator.email,
       phone: creator.phone,
+      passwordHash,
       source: { type: 'direct' },
       consentedAt: now,
       status: 'pending',
@@ -52,7 +52,6 @@ export async function createCommunityOrGroup(input: OrganizationInput) {
       slug,
       description,
       location,
-      managementTokenHash,
       adminUserId: userId,
       createdBy: userId,
       adminStatus: 'pending_verification',
@@ -70,7 +69,7 @@ export async function createCommunityOrGroup(input: OrganizationInput) {
       organizationId: organizationId.toHexString(),
       userId: userId.toHexString(),
       type, name, slug, description, location,
-      managementToken,
+      sessionToken: await createSession(userId),
       adminStatus: 'pending_verification'
     };
   } catch (error) {
@@ -80,59 +79,32 @@ export async function createCommunityOrGroup(input: OrganizationInput) {
   }
 }
 
-/**
- * Member directory and organization details require the creator's private
- * management token. Invitation links alone never authorize access.
- */
-async function authorizedOrganization(type: string, slug: string, token: string) {
-  if (!/^[a-f0-9]{64}$/.test(token)) return null;
-  const org = await db.collection('organizations').findOne({ type, slug });
-  if (!org || typeof org.managementTokenHash !== 'string') return null;
-  const providedHash = createHash('sha256').update(token).digest();
-  const savedHash = Buffer.from(org.managementTokenHash, 'hex');
-  if (providedHash.length !== savedHash.length || !timingSafeEqual(providedHash, savedHash)) return null;
-  return org;
-}
 
-export async function getManagedOrganization(type: string, slug: string, token: string) {
-  const org = await authorizedOrganization(type, slug, token);
-  if (!org) return null;
-  const [memberCount, creator] = await Promise.all([
-    db.collection('registrations').countDocuments({ 'source.organizationId': org._id }),
-    db.collection('registrations').findOne({ _id: org.adminUserId }, { projection: { _id: 1, name: 1 } })
+/** Only the authenticated organization creator can read members. */
+export async function getManagedOrganization(type: string, slug: string, userId: ObjectId) {
+  const org=await db.collection('organizations').findOne({type,slug,adminUserId:userId});
+  if(!org)return null;
+  const [memberCount, creator]=await Promise.all([
+    db.collection('registrations').countDocuments({'source.organizationId':org._id}),
+    db.collection('registrations').findOne({_id:userId},{projection:{_id:1,name:1}})
   ]);
   return {
-    id: org._id.toHexString(),
-    name: org.name,
-    type: org.type,
-    slug: org.slug,
-    description: org.description || '',
-    location: org.location || null,
-    adminStatus: org.adminStatus || 'pending_verification',
-    creator: creator ? { id: creator._id.toHexString(), name: creator.name } : null,
-    memberCount: memberCount + (creator ? 1 : 0),
-    joinedMemberCount: memberCount
+    id:org._id.toHexString(),name:org.name,type:org.type,slug:org.slug,
+    description:org.description||'',location:org.location||null,
+    adminStatus:org.adminStatus||'pending_verification',
+    creator:creator?{id:creator._id.toHexString(),name:creator.name}:null,
+    memberCount:memberCount+(creator?1:0),joinedMemberCount:memberCount
   };
 }
-
-export async function getManagedMembers(type: string, slug: string, token: string) {
-  const org = await authorizedOrganization(type, slug, token);
-  if (!org) return null;
-  const [creator, invitees] = await Promise.all([
-    db.collection('registrations').findOne(
-      { _id: org.adminUserId },
-      { projection: { _id: 1, name: 1, createdAt: 1 } }
-    ),
-    db.collection('registrations')
-      .find({ 'source.organizationId': org._id }, { projection: { _id: 1, name: 1, createdAt: 1 } })
-      .sort({ createdAt: -1 })
-      .limit(100)
-      .toArray()
+export async function getManagedMembers(type:string,slug:string,userId:ObjectId) {
+  const org=await db.collection('organizations').findOne({type,slug,adminUserId:userId});
+  if(!org)return null;
+  const [creator,members]=await Promise.all([
+    db.collection('registrations').findOne({_id:userId},{projection:{_id:1,name:1,createdAt:1}}),
+    db.collection('registrations').find({'source.organizationId':org._id},{projection:{_id:1,name:1,createdAt:1}}).sort({createdAt:-1}).limit(100).toArray()
   ]);
   return [
-    ...(creator ? [{ id: creator._id.toHexString(), name: creator.name, role: 'admin', joinedAt: creator.createdAt }] : []),
-    ...invitees.map(person => ({
-      id: person._id.toHexString(), name: person.name, role: 'member', joinedAt: person.createdAt
-    }))
+    ...(creator?[{id:creator._id.toHexString(),name:creator.name,role:'admin',joinedAt:creator.createdAt}]:[]),
+    ...members.map(person=>({id:person._id.toHexString(),name:person.name,role:'member',joinedAt:person.createdAt}))
   ];
 }
