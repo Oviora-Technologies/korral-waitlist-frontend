@@ -57,7 +57,7 @@ router.get('/:type/:slug/details', ownerOnly, async (req, res) => {
   if (!p.success) return void res.status(400).json({ error: 'Invalid organization' });
   try {
     const details = await getManagedOrganization(p.data.type,p.data.slug,res.locals.userId);
-    if (!details) return void res.status(403).json({ error: 'Only this organization's creator may view this information.' });
+    if (!details) return void res.status(403).json({ error: "Only this organization's creator may view this information." });
     res.json(details);
   } catch { res.status(500).json({ error: 'Unable to load organization' }); }
 });
