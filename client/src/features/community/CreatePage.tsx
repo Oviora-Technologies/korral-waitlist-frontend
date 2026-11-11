@@ -1,5 +1,6 @@
 import React, { useState, type FormEvent } from 'react';
 import '../../styles/WaitlistPages.css';
+import {setToken} from '../auth/authClient';
 
 const API = process.env.REACT_APP_API_URL || '';
 type Created = {
@@ -9,7 +10,7 @@ type Created = {
   name: string;
   slug: string;
   adminStatus: string;
-  managementToken: string;
+  sessionToken: string;
 };
 const slugify = (name: string) => name.toLowerCase().normalize('NFKD')
   .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -25,6 +26,8 @@ export default function CreatePage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [consent, setConsent] = useState(false);
   const [created, setCreated] = useState<Created | null>(null);
   const [error, setError] = useState('');
@@ -36,6 +39,7 @@ export default function CreatePage() {
     : '';
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if(password!==confirmPassword){setError('Passwords do not match');return;}
     setError('');setBusy(true);
     try {
       const response = await fetch(API + '/api/organizations', {
@@ -43,13 +47,13 @@ export default function CreatePage() {
         headers:{ 'Content-Type':'application/json' },
         body:JSON.stringify({
           type, name, slug, description, location: { country, stateProvince, address },
-          creator:{ fullName, email, phone },
+          creator:{ fullName, email, phone, password },
           consent
         })
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Could not create your community or group');
-      sessionStorage.setItem('vila_manager_' + result.type + '_' + result.slug, result.managementToken);
+      setToken(result.sessionToken);
       setCreated(result);
       window.location.assign('/manage/' + result.type + '/' + result.slug);
     } catch (err) {
@@ -90,7 +94,7 @@ export default function CreatePage() {
         </div> : <>
           <span className="mini-chip">CREATE YOUR COMMUNITY OR GROUP</span>
           <h2>Start something together.</h2>
-          <p>Anyone can create a community or group. No administrator login required.</p>
+          <p>Anyone can create a community or group. Create your personal login to manage this community or group later.</p>
           <form onSubmit={submit}>
             <label>WHAT WOULD YOU LIKE TO CREATE?</label>
             <div className="org-type-buttons" role="group" aria-label="Organization type">
@@ -118,11 +122,15 @@ export default function CreatePage() {
             <input id="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email" required type="email" placeholder="you@example.com"/>
             <label htmlFor="phone">PHONE NUMBER</label>
             <input id="phone" value={phone} onChange={e=>setPhone(e.target.value)} autoComplete="tel" type="tel" required minLength={7} maxLength={22} placeholder="+234 801 234 5678"/>
+            <label htmlFor="password">CREATE PASSWORD</label>
+            <input id="password" value={password} onChange={e=>setPassword(e.target.value)} type="password" autoComplete="new-password" minLength={12} maxLength={128} required placeholder="At least 12 characters"/>
+            <label htmlFor="confirm-password">CONFIRM PASSWORD</label>
+            <input id="confirm-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} type="password" autoComplete="new-password" minLength={12} maxLength={128} required placeholder="Re-enter your password"/>
             <label className="consent-box"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)} required/><span>I agree to receive VILA waitlist and launch updates.</span></label>
             {error && <p role="alert" className="form-error">{error}</p>}
             <button type="submit" className="form-primary" disabled={busy}>{busy ? 'Creating…' : 'Create and get invitation link →'}</button>
           </form>
-          <small>Already on the waitlist? Existing-user ownership verification is not yet available; use a new email for this pilot flow.</small>
+          <small>Already created a community or group? <a href="/login">Sign in to your creator dashboard</a>. Existing waitlist-only users need account verification before they can claim an account.</small>
         </>}
       </section>
     </main>
