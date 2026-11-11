@@ -111,6 +111,8 @@ Run `npm install` again **from the `server/` folder** to install the new Nodemai
 
 ## If confirmation emails are not arriving
 
+Email layout lives in `server/assets/emails/confirmation.html`, shared by all confirmation emails. Edit this formatted HTML file to change styling or layout. The renderer escapes the `{{name}}`, `{{heading}}`, `{{body}}`, `{{actionText}}`, and `{{actionUrl}}` placeholders; the block between `BEGIN ACTION` and `END ACTION` comments is omitted when no button is supplied. Include `server/assets/` alongside `server/dist/` when deploying.
+
 **Keep your local `server/.env`** file. The backend now explicitly reads it at startup; if it is absent but a local `server/.env.backup` exists, it uses the backup and displays a warning. It never deletes or overwrites either file. The `.env` stays Git-ignored because it contains private credentials.
 
 Start the backend and look for `[VILA email]` messages, which state whether SMTP configuration is present. Test SMTP **without creating another user or organization**:
@@ -120,6 +122,8 @@ cd server
 npm install
 npm run email:test -- your-real-inbox@example.com
 ```
+
+To check connectivity and authentication without sending any email, run `npm run email:test -- --verify` from `server/`. A Gmail `EAUTH` / `535` error means Gmail rejected the credentials. Create a new Google App Password for the account in `EMAIL_USER`, replace `EMAIL_PASS` in your private `server/.env`, and restart the backend.
 
 The test prints a specific SMTP error (for example, `EAUTH`, `ECONNECTION`, or `ETIMEDOUT`), or a message ID after the provider has accepted the recipient. An accepted message is not guaranteed to reach the inbox: also check spam, promotions and your sender's SMTP provider logs.
 

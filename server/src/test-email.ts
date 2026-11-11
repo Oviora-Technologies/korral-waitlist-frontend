@@ -2,9 +2,17 @@ import './config/loadEnv';
 import { sendTestEmail } from './services/emailService';
 
 async function main() {
+  if (process.argv[2] === '--verify') {
+    const ok = await sendTestEmail('', true);
+    console.log(ok
+      ? '[VILA email] SMTP connectivity and authentication verified. No email was sent.'
+      : '[VILA email] SMTP verification failed. No email was sent.');
+    if (!ok) process.exitCode = 1;
+    return;
+  }
   const to = process.argv[2]?.trim();
   if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
-    console.error('Usage: npm run email:test -- you@example.com');
+    console.error('Usage: npm run email:test -- you@example.com OR npm run email:test -- --verify');
     process.exitCode = 1;
     return;
   }
