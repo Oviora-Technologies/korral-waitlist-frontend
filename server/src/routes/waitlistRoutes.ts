@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import { z } from 'zod';
+import { sendSignupEmail } from '../services/emailService';
 import {
   findOrganization,
   registerPerson,
@@ -65,7 +66,14 @@ router.post('/join', limiter, async (req, res) => {
     const created = await registerPerson(data);
     if (!created)
       return void res.status(404).json({ error: 'Invitation not found' });
-    res.status(201).json({ message: 'You have joined the VILA waitlist!' });
+    // Registration is already saved: an email outage must not cause duplicate signups.
+    const emailSent = await sendSignupEmail({
+      name: data.name,
+      email: data.email,
+      organizationName: created.organizationName,
+      organizationType: created.organizationType,
+    });
+    res.status(201).json({ message: 'You have joined the VILA waitlist!', emailSent });
   } catch (error) {
     res.status(duplicateKey(error) ? 409 : 500).json({
       error: duplicateKey(error)
