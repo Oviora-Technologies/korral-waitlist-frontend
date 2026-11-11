@@ -51,6 +51,7 @@ export default function CreatePage() {
       if (!response.ok) throw new Error(result.error || 'Could not create your community or group');
       sessionStorage.setItem('vila_manager_' + result.type + '_' + result.slug, result.managementToken);
       setCreated(result);
+      window.location.assign('/manage/' + result.type + '/' + result.slug);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally { setBusy(false); }
