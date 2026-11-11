@@ -13,6 +13,12 @@ Simple community-first early access platform, built with **React + TypeScript** 
 - **Sign out:** Available from the creator dashboard.
 - Independent visitors continue to register at `/join`; invitees use `/c/:slug` or `/g/:slug`.
 
+## Protected creator pages and navigation
+
+The shared header checks the server session using `GET /api/auth/me`. Visitors see **Creator login**, while authenticated creators see **My communities** and **Logout**. Logout calls `POST /api/auth/logout`, clears the local bearer token, and returns to the homepage.
+
+`/dashboard` and `/manage/community/:slug` / `/manage/group/:slug` are protected at the client entry point. Visitors without a valid session are redirected to `/login?next=<requested-page>`. The Express endpoints also enforce ownership on the server; client-side route protection alone does not authorize access to private data.
+
 ## Shared layout
 
 The homepage's header and footer now live in `client/src/components/SiteLayout.tsx`. They're rendered by `App.tsx` on **all pages**, including signup, login, creator dashboard, organization creation and group/community details.
