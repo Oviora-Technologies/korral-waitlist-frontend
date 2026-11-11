@@ -48,7 +48,6 @@ export default function CommunityDetailsPage() {
     window.open('https://wa.me/?text='+encodeURIComponent('Join '+details?.name+' on the VILA waitlist: '+inviteUrl),'_blank','noopener,noreferrer');
   }
   return <div className="waitlist-screen">
-    <header className="waitlist-header"><a className="waitlist-logo" href="/">vila<span>.</span></a><nav className="registration-nav"><a href="/create">Create another</a><a className="back-link" href="/">← Home</a></nav></header>
     <main className="details-main">
       {loading?<div className="details-empty">Loading your {type}…</div>:error?<section className="waitlist-form-card details-empty"><span className="mini-chip">PRIVATE MANAGEMENT</span><h2>Access unavailable</h2><p>{error}</p><a className="form-primary" href="/create">Create a community or group →</a></section>:details&&<>
         <div className="details-heading"><div><span className="mini-label">VILA / {details.type.toUpperCase()} DETAILS</span><h1>{details.name}</h1><p>Manage your invitation and see who has registered.</p></div><span className="manager-label">Creator dashboard</span></div>
@@ -62,6 +61,6 @@ export default function CommunityDetailsPage() {
         </div>
       </>}
     </main>
-    <footer className="waitlist-footer">© {new Date().getFullYear()} VILA · Connecting communities.</footer>
+
   </div>;
 }
