@@ -1,6 +1,6 @@
-import React, { useState, type FormEvent } from 'react';
+import React, {useEffect, useState, type FormEvent} from 'react';
 import '../../styles/WaitlistPages.css';
-import {setToken} from '../auth/authClient';
+import {setToken,getToken,apiAuth} from '../auth/authClient';
 
 const API = process.env.REACT_APP_API_URL || '';
 type Created = {
@@ -33,21 +33,24 @@ export default function CreatePage() {
   const [error, setError] = useState('');
   const [copyMessage, setCopyMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [returning, setReturning] = useState(false);
+  const [accountName, setAccountName] = useState('');
+  useEffect(()=>{if(getToken())apiAuth('/api/auth/me').then(async r=>{if(r.ok){const data=await r.json();setReturning(true);setAccountName(data.user.name);}}).catch(()=>{});},[]);
 
   const invitationUrl = created
     ? window.location.origin + '/' + (created.type === 'community' ? 'c' : 'g') + '/' + created.slug
     : '';
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if(password!==confirmPassword){setError('Passwords do not match');return;}
+    if(!returning && password!==confirmPassword){setError('Passwords do not match');return;}
     setError('');setBusy(true);
     try {
       const response = await fetch(API + '/api/organizations', {
         method:'POST',
-        headers:{ 'Content-Type':'application/json' },
+        headers:{ 'Content-Type':'application/json', ...(returning?{Authorization:'Bearer '+getToken()}:{}) },
         body:JSON.stringify({
           type, name, slug, description, location: { country, stateProvince, address },
-          creator:{ fullName, email, phone, password },
+          ...(!returning?{creator:{ fullName, email, phone, password }}:{}),
           consent
         })
       });
@@ -114,8 +117,9 @@ export default function CreatePage() {
             <label htmlFor="address">ADDRESS</label>
             <input id="address" value={address} onChange={e=>setAddress(e.target.value)} minLength={5} maxLength={250} required placeholder="Street or community address"/>
             <div className="form-divider"/>
-            <div className="mini-label">YOUR DETAILS</div>
-            <p className="creator-note">We'll register you as an individual and associate your user ID with this {type} as its creator.</p>
+            <div className="mini-label">{returning?'YOUR CREATOR ACCOUNT':'YOUR DETAILS'}</div>
+            <p className="creator-note">{returning?'Signed in as '+accountName+'. This '+type+' will belong to your existing creator account.':'We will register you as an individual and associate your user ID with this '+type+' as its creator.'}</p>
+            {!returning && <>
             <label htmlFor="full-name">FULL NAME</label>
             <input id="full-name" value={fullName} onChange={e=>setFullName(e.target.value)} autoComplete="name" minLength={2} maxLength={100} required placeholder="Your full name"/>
             <label htmlFor="email">EMAIL ADDRESS</label>
@@ -126,11 +130,12 @@ export default function CreatePage() {
             <input id="password" value={password} onChange={e=>setPassword(e.target.value)} type="password" autoComplete="new-password" minLength={12} maxLength={128} required placeholder="At least 12 characters"/>
             <label htmlFor="confirm-password">CONFIRM PASSWORD</label>
             <input id="confirm-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} type="password" autoComplete="new-password" minLength={12} maxLength={128} required placeholder="Re-enter your password"/>
+            </>}
             <label className="consent-box"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)} required/><span>I agree to receive VILA waitlist and launch updates.</span></label>
             {error && <p role="alert" className="form-error">{error}</p>}
             <button type="submit" className="form-primary" disabled={busy}>{busy ? 'Creating…' : 'Create and get invitation link →'}</button>
           </form>
-          <small>Already created a community or group? <a href="/login">Sign in to your creator dashboard</a>. Existing waitlist-only users need account verification before they can claim an account.</small>
+          <small>{returning ? <a href="/dashboard">Back to my communities</a> : <span>Already created a community or group? <a href="/login">Sign in to your creator dashboard</a>.</span>}</small>
         </>}
       </section>
     </main>
