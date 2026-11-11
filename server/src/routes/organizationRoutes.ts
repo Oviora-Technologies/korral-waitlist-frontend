@@ -3,7 +3,7 @@ import { rateLimit } from 'express-rate-limit';
 import { z } from 'zod';
 import { createCommunityOrGroup, getManagedOrganization, getManagedMembers } from '../services/organizationService';
 import { duplicateKey } from '../services/waitlistService';
-import { ownerOnly } from '../services/authService';
+import { ownerOnly, findSession, sessionToken } from '../services/authService';
 
 const router = Router();
 const createLimiter = rateLimit({
@@ -25,7 +25,7 @@ const creationSchema = z.object({
     email: z.string().trim().email().transform(value => value.toLowerCase()),
     phone: z.string().trim().regex(/^\+?[0-9 ()-]{7,22}$/),
     password: z.string().min(12).max(128)
-  }),
+  }).optional(),
   consent: z.literal(true)
 });
 
@@ -33,7 +33,10 @@ router.post('/', createLimiter, async (req, res) => {
   const parsed = creationSchema.safeParse(req.body);
   if (!parsed.success) return void res.status(400).json({ error: 'Please enter the required information and agree to receive updates.' });
   try {
-    const organization = await createCommunityOrGroup(parsed.data);
+    const token = sessionToken(req);
+    const session = token ? await findSession(token) : null;
+    if (!session && !parsed.data.creator) return void res.status(401).json({error:'Please sign in or enter creator details.'});
+    const organization = await createCommunityOrGroup(parsed.data, session?.userId, session ? token : undefined);
     res.status(201).json(organization);
   } catch (error) {
     res.status(duplicateKey(error) ? 409 : 500).json({
