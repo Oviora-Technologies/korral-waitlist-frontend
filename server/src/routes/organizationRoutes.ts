@@ -74,20 +74,25 @@ router.post('/', createLimiter, async (req, res) => {
       session?.userId,
       session ? token : undefined,
     );
-    // The organization has already been created: an SMTP failure must not undo it.
-    const creator = await db.collection('registrations').findOne(
-      { _id: new ObjectId(organization.userId) },
-      { projection: { name: 1, email: 1 } },
-    );
-    const emailSent = creator?.email
-      ? await sendOrganizationCreatedEmail({
+    // Never turn a successful database write into a failed request because of email.
+    let emailSent = false;
+    try {
+      const creator = await db.collection('registrations').findOne(
+        { _id: new ObjectId(organization.userId) },
+        { projection: { name: 1, email: 1 } },
+      );
+      if (creator?.email) {
+        emailSent = await sendOrganizationCreatedEmail({
           name: creator.name,
           email: creator.email,
           type: organization.type,
           organizationName: organization.name,
           slug: organization.slug,
-        })
-      : false;
+        });
+      }
+    } catch (emailError) {
+      console.error('VILA organization was created, but notification could not be sent:', emailError instanceof Error ? emailError.message : 'Unknown error');
+    }
     res.status(201).json({ ...organization, emailSent });
   } catch (error) {
     res.status(duplicateKey(error) ? 409 : 500).json({
