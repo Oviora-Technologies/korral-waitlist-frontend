@@ -1,31 +1,23 @@
 # VILA Waitlist
 
-Community-first early access with a simple React frontend and monolithic Node.js/Express + TypeScript + MongoDB backend.
+Community-first early access for VILA, built with a simple React/TypeScript feature-based frontend and Node.js/Express/TypeScript + MongoDB monolith.
 
-## Registration flows
+## What happens
 
-- **Individual:** `/join` registers a person without requiring any community or group.
-- **Create community/group:** `/create` is public. Choose a type, enter its name and invitation slug, then enter the creator's **full name, email address, and phone number**.
-- **Creator relationship:** A successful request creates an individual record in `registrations` with its own MongoDB `_id`, then creates the organization in `organizations` with `adminUserId` referencing that individual. The user's `managedOrganizationIds` also includes the created organization.
-- **Invitation:** The resulting public URL `/c/:slug` or `/g/:slug` can be copied or shared via WhatsApp. Members joining through that link are attributed to the organization.
-- No global VILA administrator account or password is required for creation.
+1. At `/create`, anybody can create a **community** or **group**, providing its **name, description, country, state/province and address**.
+2. The creator provides **full name, email, and phone number**, and consents to VILA launch emails.
+3. VILA inserts the creator as an individual in `registrations`, and creates an organization in `organizations`. The organization's `adminUserId` references the creator's `_id`, and the creator's `managedOrganizationIds` includes the organization's `_id`.
+4. On success, the creator is redirected to **`/manage/community/:slug`** or **`/manage/group/:slug`**.
+5. The details page shows the organization's description and location, a count of registered members, a list of member names and join dates, and buttons to copy the invite link or share it via WhatsApp.
+6. Invitees register through `/c/:slug` or `/g/:slug` and are attributed to that organization. Independent users can sign up at `/join`.
 
-Example organization document:
-```js
-{
-  _id: ObjectId("..."),
-  type: "group",
-  name: "Abuloma Youth Association",
-  slug: "abuloma-youth-association",
-  adminUserId: ObjectId("..."), // creator's registrations._id
-  createdBy: ObjectId("..."),
-  adminStatus: "pending_verification"
-}
-```
+## Management access (pilot)
 
-**Important current limitation:** Creator email addresses are **not yet verified**. The creator is recorded as the organization's intended administrator, but actual authenticated management rights must wait for verification and sign-in. For now, creating another group with an email already on the waitlist returns a duplicate-email error. Add a verified returning-user flow before public launch. For standalone local MongoDB, the service uses compensating deletes on partial failures; production should use a MongoDB transaction on a replica set.
+Creation returns a random, one-time **management token**, and the client stores it in **sessionStorage** scoped to the organization. The management API requires this token for both organization details and member names; simply knowing a public invitation URL **does not** reveal members. The token is stored in MongoDB only as a SHA-256 hash.
 
-## Structure
+**Limitations:** This is *temporary bearer-token access*, not authenticated, verified ownership. The creator loses dashboard access when the browser session closes; no account login or token recovery exists yet. Anyone can currently claim an unverified email address when creating an organization. Before a real launch, add email/phone verification, account sign-in, role authorization, recovery, and comprehensive privacy policies. Old communities/groups created before the management-token update cannot use the new page without a migration or re-creation. Members are limited to the 100 most recent invited registrations plus the creator, while counts show all registrations. Email addresses and phone numbers are not disclosed in the member list.
+
+## Repo structure
 
 ```text
 vila-waitlist/
@@ -36,14 +28,16 @@ vila-waitlist/
 │       ├── features/
 │       │   ├── home/HomePage.tsx
 │       │   ├── waitlist/JoinPage.tsx
-│       │   └── community/CreatePage.tsx
+│       │   └── community/
+│       │       ├── CreatePage.tsx
+│       │       └── CommunityDetailsPage.tsx
 │       └── styles/WaitlistPages.css
 └── server/
     ├── package.json
     └── src/
         ├── index.ts
         ├── app.ts
-        ├── config/
+        ├── config/database.ts
         ├── services/
         │   ├── waitlistService.ts
         │   └── organizationService.ts
@@ -52,11 +46,12 @@ vila-waitlist/
             └── organizationRoutes.ts
 ```
 
-The `client` and `server` have separate `package.json`, `package-lock.json` and `node_modules`. There is **no root npm workspace**. The server keeps its nodemon development script.
+The client and server have **separate** `package.json`, lockfiles, and `node_modules`; there is no root npm workspace.
 
 ## Run locally
 
-Terminal one:
+Terminal one (backend):
+
 ```bash
 cd server
 npm install
@@ -64,22 +59,27 @@ cp .env.example .env
 npm run dev
 ```
 
-Terminal two:
+Configure a running local MongoDB or your Atlas `MONGODB_URI`. Nodemon restarts the Express API on port 4000.
+
+Terminal two (frontend):
+
 ```bash
 cd client
 npm install
 npm start
 ```
 
-Configure local MongoDB or set `MONGODB_URI` for MongoDB Atlas. The client runs at http://localhost:3000 and proxies API calls to http://localhost:4000.
+The Create React App client runs on port 3000, proxying `/api` to port 4000.
+
+Build each project independently with `npm run build` from its own folder.
 
 ## API
 
 - `GET /api/health`
-- `POST /api/join` — individual or invitation-based registration
-- `GET /api/organization/:type/:slug` — invitation details
-- `POST /api/organizations` — create individual + organization with linked administrator ID
+- `POST /api/join`
+- `GET /api/organization/:type/:slug` — public invite details only (no members)
+- `POST /api/organizations` — create individual and organization, issue one-time management token
+- `GET /api/organizations/:type/:slug/details` — creator-only, requires `x-management-token`
+- `GET /api/organizations/:type/:slug/members` — creator-only, requires `x-management-token`
 
-## Before launch
-
-Implement email/phone verification, authenticated owner login, server-side consent records with policy version, anti-bot checks, proper privacy policy, data retention and HTTPS. Joining by link is not proof of residency or membership.
+Before production, also add MongoDB transactions for atomic writes, rate limiting and CAPTCHA, email verification, data retention, and privacy disclosures. The existing compensating deletes provide best-effort cleanup but aren't a substitute for a transaction.
