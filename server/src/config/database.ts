@@ -7,4 +7,6 @@ export async function connectDatabase() {
   await mongoClient.connect();
   await db.collection('registrations').createIndex({ email: 1 }, { unique: true });
   await db.collection('organizations').createIndex({ type: 1, slug: 1 }, { unique: true });
+  await db.collection('sessions').createIndex({ tokenHash: 1 }, { unique: true });
+  await db.collection('sessions').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 }
