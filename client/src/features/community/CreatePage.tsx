@@ -93,6 +93,7 @@ export default function CreatePage() {
           result.error || 'Could not create your community or group',
         );
       setToken(result.sessionToken);
+      sessionStorage.setItem('vila_last_creation_email_status', result.emailSent === true ? 'accepted' : 'failed');
       setCreated(result);
       window.location.assign('/manage/' + result.type + '/' + result.slug);
     } catch (err) {
