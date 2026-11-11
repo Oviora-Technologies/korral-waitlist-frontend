@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './config/env';
 import waitlistRoutes from './routes/waitlistRoutes';
-import adminRoutes from './routes/adminRoutes';
+import organizationRoutes from './routes/organizationRoutes';
 
 export const app = express();
 app.disable('x-powered-by');
@@ -12,4 +12,4 @@ app.use(cors({ origin: env.clientOrigin }));
 app.use(express.json({ limit: '16kb' }));
 app.get('/api/health', (_req,res) => res.json({ok:true}));
 app.use('/api', waitlistRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/organizations', organizationRoutes);
