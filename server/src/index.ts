@@ -5,7 +5,7 @@ import { MongoClient } from 'mongodb';
 import { z } from 'zod';
 
 const app = express();
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173' }));
+app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000' }));
 app.use(express.json());
 const client = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017');
 const db = client.db(process.env.MONGODB_DB || 'vila_waitlist');
