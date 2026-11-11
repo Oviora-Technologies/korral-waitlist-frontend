@@ -56,3 +56,19 @@
 .details-empty h2{margin:20px 0}
 @media(max-width:850px){.details-layout{grid-template-columns:1fr}.details-side-column{order:-1}.details-metrics{gap:10px}.details-metrics article{padding:18px}}
 @media(max-width:600px){.location-form-grid{grid-template-columns:1fr;gap:0}.details-main{padding:32px 6% 75px}.details-heading{display:block}.manager-label{display:inline-flex;margin-top:5px}.details-metrics{grid-template-columns:1fr 1fr}.details-metrics article:last-child{grid-column:1/-1}.details-metrics strong{font-size:29px}.details-panel{padding:20px}.details-section-header{align-items:start}.member-role{font-size:9px}.details-location{gap:12px}}
+
+/* Shared layout, creator login and dashboard */
+.vila-app-layout{min-height:100vh;display:flex;flex-direction:column;background:#f9fafb}
+.vila-app-layout>main,.vila-app-layout>.waitlist-screen,.vila-app-layout>.vila-page{flex:1}
+.vila-app-layout>.waitlist-screen{min-height:auto}
+.vila-app-layout>.footer{width:100%;flex-shrink:0}
+.vila-app-layout .topbar{width:100%;flex-shrink:0}
+.dashboard-toolbar{display:flex;justify-content:space-between;align-items:center;gap:18px;margin:15px 0 28px}
+.dashboard-toolbar .form-primary{margin:0;width:auto;padding:14px 18px}
+.dashboard-org-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.dashboard-org-grid .details-panel h2{margin:20px 0 12px;font:800 23px/1.35 Manrope,sans-serif;letter-spacing:-.8px}
+.dashboard-org-grid .details-panel p{font-size:13px;color:#7d8c9d;line-height:1.8;min-height:44px}
+.dashboard-org-grid .details-panel small{display:block;color:#8797a7;font-size:12px;margin-top:12px}
+.dashboard-org-grid .form-primary{margin-top:24px}
+.dashboard-invite{display:block;margin-top:16px;color:#2889bc;font-size:12px;font-weight:800;text-align:center}
+@media(max-width:700px){.dashboard-org-grid{grid-template-columns:1fr}.dashboard-toolbar{align-items:start;flex-direction:column}}
