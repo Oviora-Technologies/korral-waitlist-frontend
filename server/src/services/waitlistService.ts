@@ -5,11 +5,15 @@ export async function findOrganization(type: string, slug: string) {
 }
 
 export async function registerPerson(data: {
-  name: string; email: string; organizationType?: 'community'|'group'; organizationSlug?: string;
+  name: string;
+  email: string;
+  organizationType?: 'community' | 'group';
+  organizationSlug?: string;
 }) {
-  const organization = data.organizationType && data.organizationSlug
-    ? await findOrganization(data.organizationType, data.organizationSlug)
-    : null;
+  const organization =
+    data.organizationType && data.organizationSlug
+      ? await findOrganization(data.organizationType, data.organizationSlug)
+      : null;
 
   if (data.organizationType && !organization) return false;
 
@@ -17,16 +21,24 @@ export async function registerPerson(data: {
     name: data.name,
     email: data.email,
     source: organization
-      ? { type: organization.type, slug: organization.slug, organizationId: organization._id }
+      ? {
+          type: organization.type,
+          slug: organization.slug,
+          organizationId: organization._id,
+        }
       : { type: 'direct' },
     consentedAt: new Date(),
     status: 'pending',
-    createdAt: new Date()
+    createdAt: new Date(),
   });
   return true;
 }
 
 export function duplicateKey(error: unknown) {
-  return typeof error === 'object' && error !== null && 'code' in error &&
-    (error as { code: unknown }).code === 11000;
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code: unknown }).code === 11000
+  );
 }
