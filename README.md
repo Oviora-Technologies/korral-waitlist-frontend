@@ -107,3 +107,22 @@ With Gmail SMTP, use an app password or another supported SMTP credential; do no
 Run `npm install` again **from the `server/` folder** to install the new Nodemailer dependency, then `npm run dev`. The frontend does not need new dependencies.
 
 **Credential safety:** `server/.env` was previously accidentally checked into Git; it has now been removed from tracking and `server/.gitignore` ignores it. **Back up your local `server/.env` before pulling** because Git may delete the previously tracked file on pull. Recreate it afterward from the example and your private values. Rotate any real database, SMTP, or other secrets contained in the previously committed file, since removing it from the current branch does not erase Git history. Do not commit live passwords or API keys.
+
+
+## If confirmation emails are not arriving
+
+**Keep your local `server/.env`** file. The backend now explicitly reads it at startup; if it is absent but a local `server/.env.backup` exists, it uses the backup and displays a warning. It never deletes or overwrites either file. The `.env` stays Git-ignored because it contains private credentials.
+
+Start the backend and look for `[VILA email]` messages, which state whether SMTP configuration is present. Test SMTP **without creating another user or organization**:
+
+```bash
+cd server
+npm install
+npm run email:test -- your-real-inbox@example.com
+```
+
+The test prints a specific SMTP error (for example, `EAUTH`, `ECONNECTION`, or `ETIMEDOUT`), or a message ID after the provider has accepted the recipient. An accepted message is not guaranteed to reach the inbox: also check spam, promotions and your sender's SMTP provider logs.
+
+For Gmail, `EMAIL_USER` must be the real Gmail address and `EMAIL_PASS` must be a Google App Password enabled for that account (not a normal Gmail account password). Make sure `EMAIL_FROM` matches the sending account or a configured alias. If the test fails, fix the SMTP credentials or port/network connection **before** testing a new registration.
+
+The website reports confirmation-email status on the individual signup success page and immediately after creating an organization. The database write remains successful even when SMTP fails, preventing a retry from creating duplicate records. Do not share or commit your `EMAIL_PASS` value.
