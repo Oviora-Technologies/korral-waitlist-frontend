@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "nodemon --watch src --ext ts --exec tsx src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "add:org": "tsx src/add-organization.ts"
@@ -27,6 +27,7 @@
     "@types/cors": "^2.8.0",
     "@types/cookie-parser": "^1.4.0",
     "@types/jsonwebtoken": "^9.0.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "nodemon": "^3.1.10"
   }
 }
