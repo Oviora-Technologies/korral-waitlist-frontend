@@ -72,3 +72,13 @@
 .dashboard-org-grid .form-primary{margin-top:24px}
 .dashboard-invite{display:block;margin-top:16px;color:#2889bc;font-size:12px;font-weight:800;text-align:center}
 @media(max-width:700px){.dashboard-org-grid{grid-template-columns:1fr}.dashboard-toolbar{align-items:start;flex-direction:column}}
+
+/* Ensure login, create and dashboard links are accessible on tablet and mobile. */
+@media(max-width:1160px){
+  .vila-app-layout .topbar{position:relative}
+  .vila-app-layout .toplinks{display:none;position:absolute;z-index:40;top:74px;left:6%;right:6%;flex-direction:column;align-items:stretch;gap:4px;background:#fff;border:1px solid #e4edf2;border-radius:15px;padding:14px;box-shadow:0 18px 35px #13293c22}
+  .vila-app-layout .toplinks.open{display:flex}
+  .vila-app-layout .toplinks a,.vila-app-layout .toplinks>a:not(.top-join),.vila-app-layout .toplinks.open>a:not(.top-join){display:flex;align-items:center;padding:12px 14px;font-size:13px}
+  .vila-app-layout .toplinks .top-join{justify-content:center}
+  .vila-app-layout .mobile-menu{display:block}
+}
