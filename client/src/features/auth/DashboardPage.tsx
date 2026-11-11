@@ -1,5 +1,5 @@
 import React,{useEffect,useState} from 'react';
-import {apiAuth,API,clearToken} from './authClient';
+import {apiAuth} from './authClient';
 import '../../styles/WaitlistPages.css';
 type Org={id:string;name:string;type:'community'|'group';slug:string;description:string;location?:{country:string;stateProvince:string;address:string}};
 export default function DashboardPage(){
@@ -12,10 +12,9 @@ export default function DashboardPage(){
     if(!r.ok)throw new Error('Unable to load your dashboard');
     const data=await r.json();setOrgs(data.organizations);setUser(data.user);
   }).catch(e=>setError(e.message)).finally(()=>setBusy(false));},[]);
-  async function signOut(){await apiAuth('/api/auth/logout',{method:'POST'}).catch(()=>{});clearToken();window.location.assign('/login');}
   function invite(o:Org){return window.location.origin+'/'+(o.type==='community'?'c':'g')+'/'+o.slug;}
   return <main className="details-main">
-    <div className="details-heading"><div><span className="mini-label">VILA · CREATOR DASHBOARD</span><h1>My communities & groups</h1><p>{user?'Welcome back, '+user.name+'. Manage what you started.':'Manage your communities and groups.'}</p></div><button className="text-logout" onClick={signOut}>Sign out</button></div>
+    <div className="details-heading"><div><span className="mini-label">VILA · CREATOR DASHBOARD</span><h1>My communities & groups</h1><p>{user?'Welcome back, '+user.name+'. Manage what you started.':'Manage your communities and groups.'}</p></div><a className="dashboard-heading-link" href="/create">Create community or group →</a></div>
     {busy?<p>Loading your communities…</p>:error?<p role="alert" className="form-error">{error}</p>:<>
       <div className="dashboard-toolbar"><strong>{orgs.length} created</strong><a className="form-primary" href="/create">Create another →</a></div>
       <div className="dashboard-org-grid">{orgs.map(o=><article className="details-panel" key={o.id}><span className="mini-chip">{o.type.toUpperCase()}</span><h2>{o.name}</h2><p>{o.description}</p><small>{[o.location?.stateProvince,o.location?.country].filter(Boolean).join(', ')}</small><a className="form-primary" href={'/manage/'+o.type+'/'+o.slug}>Open details →</a><a className="dashboard-invite" href={invite(o)} target="_blank" rel="noreferrer">Member invitation link ↗</a></article>)}</div>
