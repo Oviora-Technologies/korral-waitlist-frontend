@@ -65,7 +65,6 @@ export default function CreatePage() {
     window.open('https://wa.me/?text=' + encodeURIComponent(message),'_blank','noopener,noreferrer');
   }
   return <div className="waitlist-screen">
-    <header className="waitlist-header"><a className="waitlist-logo" href="/">vila<span>.</span></a><nav className="registration-nav"><a href="/join">Join as an individual</a><a className="back-link" href="/">← Home</a></nav></header>
     <main className="waitlist-main">
       <div className="waitlist-story">
         <div className="mini-label">VILA · COMMUNITY FIRST</div>
@@ -127,6 +126,6 @@ export default function CreatePage() {
         </>}
       </section>
     </main>
-    <footer className="waitlist-footer">© {new Date().getFullYear()} VILA · Community-first growth.</footer>
+
   </div>;
 }
