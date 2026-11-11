@@ -1,4 +1,7 @@
 import { Router } from 'express';
+import { ObjectId } from 'mongodb';
+import { db } from '../config/database';
+import { sendOrganizationCreatedEmail } from '../services/emailService';
 import { rateLimit } from 'express-rate-limit';
 import { z } from 'zod';
 import {
@@ -71,7 +74,21 @@ router.post('/', createLimiter, async (req, res) => {
       session?.userId,
       session ? token : undefined,
     );
-    res.status(201).json(organization);
+    // The organization has already been created: an SMTP failure must not undo it.
+    const creator = await db.collection('registrations').findOne(
+      { _id: new ObjectId(organization.userId) },
+      { projection: { name: 1, email: 1 } },
+    );
+    const emailSent = creator?.email
+      ? await sendOrganizationCreatedEmail({
+          name: creator.name,
+          email: creator.email,
+          type: organization.type,
+          organizationName: organization.name,
+          slug: organization.slug,
+        })
+      : false;
+    res.status(201).json({ ...organization, emailSent });
   } catch (error) {
     res.status(duplicateKey(error) ? 409 : 500).json({
       error: duplicateKey(error)
