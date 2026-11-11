@@ -1,85 +1,69 @@
 # VILA Waitlist
 
-Community-first early access for VILA, built with a simple React/TypeScript feature-based frontend and Node.js/Express/TypeScript + MongoDB monolith.
+Simple community-first early access platform, built with **React + TypeScript** (feature-based frontend) and **Node.js + Express + TypeScript + MongoDB** (one monolithic backend). The client and server each own their package.json, package-lock.json, and node_modules. There is no root npm workspace.
 
-## What happens
+## Creator registration and login
 
-1. At `/create`, anybody can create a **community** or **group**, providing its **name, description, country, state/province and address**.
-2. The creator provides **full name, email, and phone number**, and consents to VILA launch emails.
-3. VILA inserts the creator as an individual in `registrations`, and creates an organization in `organizations`. The organization's `adminUserId` references the creator's `_id`, and the creator's `managedOrganizationIds` includes the organization's `_id`.
-4. On success, the creator is redirected to **`/manage/community/:slug`** or **`/manage/group/:slug`**.
-5. The details page shows the organization's description and location, a count of registered members, a list of member names and join dates, and buttons to copy the invite link or share it via WhatsApp.
-6. Invitees register through `/c/:slug` or `/g/:slug` and are attributed to that organization. Independent users can sign up at `/join`.
+- **Create:** Go to `/create`. Enter the community/group name, description, country, state/province and address. The creator provides full name, email, phone and a **password (at least 12 characters)**.
+- A creator registration is saved in `registrations` as an individual. The password is stored only as a salted **scrypt hash** (`passwordHash`), never in plaintext.
+- The created organization stores `adminUserId` referencing the person's `_id`. The individual also receives the organization's ID in `managedOrganizationIds`.
+- After creation, the creator receives a signed-in session and is redirected to `/manage/community/:slug` or `/manage/group/:slug`.
+- **Sign in:** Visit `/login` with the creator email/password. Successful login takes the creator to `/dashboard`, listing **My communities & groups**. They can open details, see registration counts/member names, copy invitation links and share them via WhatsApp.
+- **Create additional organizations:** After signing in, `/create` reuses the existing individual account instead of asking for another password or duplicating the registration.
+- **Sign out:** Available from the creator dashboard.
+- Independent visitors continue to register at `/join`; invitees use `/c/:slug` or `/g/:slug`.
 
-## Management access (pilot)
+## Shared layout
 
-Creation returns a random, one-time **management token**, and the client stores it in **sessionStorage** scoped to the organization. The management API requires this token for both organization details and member names; simply knowing a public invitation URL **does not** reveal members. The token is stored in MongoDB only as a SHA-256 hash.
+The homepage's header and footer now live in `client/src/components/SiteLayout.tsx`. They're rendered by `App.tsx` on **all pages**, including signup, login, creator dashboard, organization creation and group/community details.
 
-**Limitations:** This is *temporary bearer-token access*, not authenticated, verified ownership. The creator loses dashboard access when the browser session closes; no account login or token recovery exists yet. Anyone can currently claim an unverified email address when creating an organization. Before a real launch, add email/phone verification, account sign-in, role authorization, recovery, and comprehensive privacy policies. Old communities/groups created before the management-token update cannot use the new page without a migration or re-creation. Members are limited to the 100 most recent invited registrations plus the creator, while counts show all registrations. Email addresses and phone numbers are not disclosed in the member list.
+## Backend access protection
 
-## Repo structure
+Sessions are random 256-bit bearer tokens, SHA-256 hashed at rest in MongoDB `sessions`, with a **7-day expiration** and an automatic TTL index. API routes check the logged-in creator's user ID against `organizations.adminUserId` before returning members or management details. Invitation links do **not** authorize access to member lists. Login and creation endpoints have rate limits.
 
-```text
-vila-waitlist/
-├── client/
-│   ├── package.json
-│   └── src/
-│       ├── App.tsx
-│       ├── features/
-│       │   ├── home/HomePage.tsx
-│       │   ├── waitlist/JoinPage.tsx
-│       │   └── community/
-│       │       ├── CreatePage.tsx
-│       │       └── CommunityDetailsPage.tsx
-│       └── styles/WaitlistPages.css
-└── server/
-    ├── package.json
-    └── src/
-        ├── index.ts
-        ├── app.ts
-        ├── config/database.ts
-        ├── services/
-        │   ├── waitlistService.ts
-        │   └── organizationService.ts
-        └── routes/
-            ├── waitlistRoutes.ts
-            └── organizationRoutes.ts
-```
+This is still an MVP: sessions are stored in browser sessionStorage and require HTTPS in production. Add email verification, password-reset/account recovery, CSRF/XSS hardening, full consent/privacy policy, login abuse monitoring, and MongoDB transactions before a public release. Existing organizations created before password support need an ownership-verification/migration workflow before their creators can sign in; **do not** let visitors claim old records by just providing an email.
 
-The client and server have **separate** `package.json`, lockfiles, and `node_modules`; there is no root npm workspace.
+## Routes
 
-## Run locally
+| Client | Purpose |
+| --- | --- |
+| `/` | Homepage |
+| `/join` | Independent signup |
+| `/create` | Community/group creation + creator registration |
+| `/login` | Email/password creator login |
+| `/dashboard` | Owned communities/groups |
+| `/manage/community/:slug` | Community details and members |
+| `/manage/group/:slug` | Group details and members |
+| `/c/:slug`, `/g/:slug` | Shareable member invitation pages |
 
-Terminal one (backend):
+### API
+- `POST /api/organizations` — create organization and account (or use existing creator session)
+- `GET /api/organizations/:type/:slug/details` — creator-only
+- `GET /api/organizations/:type/:slug/members` — creator-only
+- `POST /api/auth/login` — email/password login
+- `GET /api/auth/me` — logged-in creator and organizations
+- `POST /api/auth/logout` — invalidate session
+- `POST /api/join` — waitlist registration
+- `GET /api/organization/:type/:slug` — public invite info
+- `GET /api/health` — API health
 
+## Run independently
+
+Terminal one:
 ```bash
 cd server
 npm install
 cp .env.example .env
 npm run dev
 ```
+Configure `server/.env` with `MONGODB_URI`. Nodemon + tsx runs the API on http://localhost:4000.
 
-Configure a running local MongoDB or your Atlas `MONGODB_URI`. Nodemon restarts the Express API on port 4000.
-
-Terminal two (frontend):
-
+Terminal two:
 ```bash
 cd client
 npm install
 npm start
 ```
+React runs at http://localhost:3000 and proxies `/api` to port 4000. Build each app with `npm run build` in its own folder.
 
-The Create React App client runs on port 3000, proxying `/api` to port 4000.
-
-Build each project independently with `npm run build` from its own folder.
-
-## API
-
-- `GET /api/health`
-- `POST /api/join`
-- `GET /api/organization/:type/:slug` — public invite details only (no members)
-- `POST /api/organizations` — create individual and organization, issue one-time management token
-- `GET /api/organizations/:type/:slug/details` — creator-only, requires `x-management-token`
-- `GET /api/organizations/:type/:slug/members` — creator-only, requires `x-management-token`
-
-Before production, also add MongoDB transactions for atomic writes, rate limiting and CAPTCHA, email verification, data retention, and privacy disclosures. The existing compensating deletes provide best-effort cleanup but aren't a substitute for a transaction.
+**Note:** The changed source files have been committed, but the build still needs to be run locally; this environment does not have npm/GitHub network access.
