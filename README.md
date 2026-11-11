@@ -1,41 +1,38 @@
 # VILA Waitlist
 
-A clean, modern, mobile-first website for VILA's early-access waitlist.
+Modern community-first early access for VILA, built with **React (Create React App) + TypeScript**, **Node.js + Express + TypeScript**, and **MongoDB**. No Next.js.
 
-## Stack
-- **Client:** React 19, TypeScript, Create React App (`react-scripts`), custom responsive CSS
-- **Server:** Node.js, Express, TypeScript, MongoDB
-- **No Next.js**
+## Flow
 
-## Setup
+1. VILA contacts a community, group or organization.
+2. An admin signs in at `/admin`, creates the community/group, and copies its dedicated link.
+3. The organization shares the link with members. The separate registration page displays the organization name and records the signup source.
+4. Anyone else can join independently at `/join` without selecting a community or group.
 
-1. Make sure Node.js and MongoDB are installed.
-2. Install dependencies:
+## Pages
+
+- `/` — marketing homepage (no form)
+- `/join` — independent waitlist registration
+- `/c/abuloma` — example community invitation
+- `/g/abuloma-youth` — example group invitation
+- `/admin` — admin login, create community/group, copy unique links, and view signup counts
+
+**Invitation examples only work after creating that organization.** The database doesn't come pre-populated.
+
+## Run
+
+Install MongoDB locally or set a MongoDB Atlas connection string, then:
 
 ```bash
 npm install
 cp server/.env.example server/.env
+# Edit server/.env and set secure ADMIN_PASSWORD and JWT_SECRET
 npm run dev
 ```
 
-- Frontend: http://localhost:3000
-- Backend: http://localhost:4000
-- The client proxies `/api` requests to port 4000 in development.
+Client: http://localhost:3000 (Create React App); API: http://localhost:4000 (nodemon + tsx).
 
-## Waitlist links
-
-- Direct: `/`
-- Community: `/c/abuloma`
-- Group: `/g/example-youth`
-
-First create the community or group in MongoDB using the provided command:
-
-```bash
-npm run add:org -w server -- community "Abuloma" abuloma
-npm run add:org -w server -- group "Example Youth" example-youth
-```
-
-Then distribute the corresponding URL on your deployed domain.
+You can also run `npm run dev -w server` and `npm start -w client` separately.
 
 ## Build
 
@@ -43,6 +40,6 @@ Then distribute the corresponding URL on your deployed domain.
 npm run build
 ```
 
-## Before public launch
+## Production notes
 
-The MVP is not production-ready yet. Add email verification, privacy policy, server-side consent recording, abuse/rate limiting, and production deployment configurations before collecting personal details. Do not treat joining through a community or group link as proof of membership.
+This is an MVP. Admin sessions use short-lived bearer tokens stored in sessionStorage, and the API rate-limits signup and admin login. Before a public rollout: implement email verification, proper privacy notice and consent language, stronger anti-bot protections, operational monitoring, HTTPS and controlled admin access. Do not treat an invitation link as proof of residence or group membership. Verify the build before deployment.
