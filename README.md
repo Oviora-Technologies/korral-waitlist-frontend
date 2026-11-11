@@ -5,8 +5,8 @@ Modern community-first early access for VILA, built with **React (Create React A
 ## Flow
 
 1. VILA contacts a community, group or organization.
-2. An admin signs in at `/admin`, creates the community/group, and copies its dedicated link.
-3. The organization shares the link with members. The separate registration page displays the organization name and records the signup source.
+2. An admin opens `/create` and signs in, chooses **Create community** or **Create group**, and enters its name. The dedicated invitation link is generated automatically.
+3. The admin copies the invitation link or taps **Share on WhatsApp** to send it to the organization's members. The separate registration page displays the organization name and records the signup source.
 4. Anyone else can join independently at `/join` without selecting a community or group.
 
 ## Pages
@@ -15,7 +15,8 @@ Modern community-first early access for VILA, built with **React (Create React A
 - `/join` — independent waitlist registration
 - `/c/abuloma` — example community invitation
 - `/g/abuloma-youth` — example group invitation
-- `/admin` — admin login, create community/group, copy unique links, and view signup counts
+- `/create` — clearly labeled community/group creation page (admin password required), instant copy and WhatsApp sharing
+- `/admin` — same private administrator dashboard, including signup counts
 
 **Invitation examples only work after creating that organization.** The database doesn't come pre-populated.
 
