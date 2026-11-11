@@ -34,6 +34,11 @@ export default function CommunityDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [message, setMessage] = useState('');
+  const [creationEmailStatus] = useState(() => {
+    const status = sessionStorage.getItem('vila_last_creation_email_status');
+    sessionStorage.removeItem('vila_last_creation_email_status');
+    return status;
+  });
 
   const inviteUrl =
     window.location.origin +
@@ -135,6 +140,16 @@ export default function CommunityDetailsPage() {
                 </div>
                 <span className='manager-label'>Creator dashboard</span>
               </div>
+              {creationEmailStatus === 'failed' && (
+                <p role='status' className='form-error'>
+                  Your organization was created successfully, but the confirmation email could not be sent. Check your SMTP configuration or contact VILA support.
+                </p>
+              )}
+              {creationEmailStatus === 'accepted' && (
+                <p role='status' className='form-note'>
+                  Your organization was created. The confirmation email was accepted by the mail server; check your inbox or spam folder.
+                </p>
+              )}
               <div className='details-metrics'>
                 <article>
                   <span>Registered people</span>
