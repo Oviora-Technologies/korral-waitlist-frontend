@@ -31,7 +31,10 @@ export async function registerPerson(data: {
     status: 'pending',
     createdAt: new Date(),
   });
-  return true;
+  return {
+    organizationName: organization?.name as string | undefined,
+    organizationType: organization?.type as string | undefined,
+  };
 }
 
 export function duplicateKey(error: unknown) {
