@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './HomePage.css';
 
 function Icon({ name, size = 20 }: { name: string; size?: number }) {
@@ -26,18 +26,7 @@ const features = [
   { icon: 'calendar', title: 'Make things happen', text: 'Show up for events, ideas, and projects that bring us together.' }
 ];
 function HomePage() {
-  const [menuOpen, setMenuOpen] = useState(false);
   return <div className="vila-page">
-    <header className="topbar page-container">
-      <a className="wordmark" href="/" aria-label="VILA home"><span className="brand-symbol">v<span className="brand-dot">.</span></span><span>vila<span className="accent">.</span></span></a>
-      <nav className={menuOpen ? 'toplinks open' : 'toplinks'} aria-label="Main navigation">
-        <a href="#why-vila" onClick={() => setMenuOpen(false)}>Why VILA</a>
-        <a href="#how-it-works" onClick={() => setMenuOpen(false)}>How it works</a>
-        <a href="/create" onClick={() => setMenuOpen(false)}>Create a community or group</a>
-        <a className="top-join" href="/join" onClick={() => setMenuOpen(false)}>Get early access <Icon name="up" size={16}/></a>
-      </nav>
-      <button className="mobile-menu" type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMenuOpen(!menuOpen)}><Icon name={menuOpen ? 'close' : 'menu'}/></button>
-    </header>
     <main>
       <section className="hero page-container">
         <div className="hero-content">
@@ -60,7 +49,7 @@ function HomePage() {
       <section id="how-it-works" className="steps-section"><div className="page-container steps-layout"><div><div className="label"><span className="short-line"/> SIMPLE BY DESIGN</div><h2>It's your community.<br/><em>Come on in.</em></h2><p>Whether you're joining with your neighborhood, an organization, or just yourself — there's a place for you here.</p></div><div className="steps"><div className="step"><b>01</b><span><strong>Find your invitation</strong><small>Join through a community or group link, or come directly.</small></span></div><div className="step"><b>02</b><span><strong>Save your spot</strong><small>A quick signup is all it takes. No group required.</small></span></div><div className="step"><b>03</b><span><strong>Be first to know</strong><small>We'll share the good news when VILA is ready.</small></span></div></div></div></section>
       <section id="join" className="signup-section"><div className="page-container signup-layout"><div className="signup-intro"><div className="label signup-label"><span className="short-line"/> YOUR INVITATION STARTS HERE</div><h2>Be part of<br/>something <em>good.</em></h2><p>Great communities don't just happen. They're made together. Join us from the very beginning.</p><div className="signup-footnote"><span className="tiny-star">✳</span> One community at a time. Everywhere in mind.</div></div><div className="signup-panel"><div className="panel-heading"><span className="pill">EARLY ACCESS</span><span className="panel-count">VILA / 001</span></div><h3>Your spot is waiting.</h3><p className="panel-description">Join independently or register through an invitation from your community or group.</p><a className="button button-blue submit-button" href="/join">Join the waitlist <Icon name="arrow"/></a><p className="small-print">No community or group required.</p><a className="create-group-link" href="/create">Organizing a community or group? Create an invite link →</a></div></div></section>
     </main>
-    <footer className="footer page-container"><a className="wordmark" href="/"><span className="brand-symbol">v<span className="brand-dot">.</span></span><span>vila<span className="accent">.</span></span></a><p>Made for the places we call home.</p><span>© {new Date().getFullYear()} VILA. All rights reserved.</span></footer>
+
   </div>;
 }
 export default HomePage;
