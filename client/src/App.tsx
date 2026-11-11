@@ -1,10 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { useParams, Routes, Route, Link } from 'react-router-dom';
+import { useParams, useLocation, Routes, Route, Link } from 'react-router-dom';
 import { ArrowUpRight, ArrowRight, Users, ShieldCheck, Store, CalendarDays, HeartHandshake, MapPin } from 'lucide-react';
 
 type Org = { name: string; type: 'community'|'group'; slug: string };
 function Landing() {
-  const { type, slug } = useParams();
+  const { slug } = useParams();
+  const path = useLocation().pathname;
+  const type = path.startsWith('/c/') ? 'c' : path.startsWith('/g/') ? 'g' : undefined;
   const [org, setOrg] = useState<Org|null>(null);
   const [invalid, setInvalid] = useState(false);
   const [name, setName] = useState('');
@@ -44,4 +46,4 @@ function Landing() {
     </main><footer><Link className="brand footer-brand" to="/"><span className="mark">v</span>vila<span className="period">.</span></Link><span>Building belonging, everywhere.</span><span>© {new Date().getFullYear()} VILA</span></footer>
   </div>;
 }
-export default function App(){return <Routes><Route path="/" element={<Landing/>}/><Route path="/c/:slug" element={<Landing typePlaceholder/> as any}/><Route path="/g/:slug" element={<Landing typePlaceholder/> as any}/></Routes>}
+export default function App(){return <Routes><Route path="/" element={<Landing/>}/><Route path="/c/:slug" element={<Landing/>}/><Route path="/g/:slug" element={<Landing typePlaceholder/> as any}/></Routes>}
