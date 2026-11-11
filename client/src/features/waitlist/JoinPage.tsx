@@ -16,6 +16,7 @@ export default function JoinPage() {
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   useEffect(() => {
     if (!invitation) return;
@@ -62,6 +63,7 @@ export default function JoinPage() {
       const result = await response.json();
       if (!response.ok)
         throw new Error(result.error || 'Could not join the waitlist');
+      setEmailSent(result.emailSent === true);
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -98,6 +100,7 @@ export default function JoinPage() {
                 Thanks for being part of VILA's beginning. We'll share updates
                 as launch approaches.
               </p>
+              <p role='status'>{emailSent ? 'A confirmation email has been submitted for delivery to your inbox.' : 'Your registration was saved, but a confirmation email could not be sent right now.'}</p>
               <a href='/' className='form-primary'>
                 Back to VILA →
               </a>
