@@ -9,6 +9,7 @@ type Created = {
   name: string;
   slug: string;
   adminStatus: string;
+  managementToken: string;
 };
 const slugify = (name: string) => name.toLowerCase().normalize('NFKD')
   .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -17,6 +18,10 @@ export default function CreatePage() {
   const [type, setType] = useState<'community'|'group'>('community');
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
+  const [description, setDescription] = useState('');
+  const [country, setCountry] = useState('Nigeria');
+  const [stateProvince, setStateProvince] = useState('');
+  const [address, setAddress] = useState('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -37,13 +42,14 @@ export default function CreatePage() {
         method:'POST',
         headers:{ 'Content-Type':'application/json' },
         body:JSON.stringify({
-          type, name, slug,
+          type, name, slug, description, location: { country, stateProvince, address },
           creator:{ fullName, email, phone },
           consent
         })
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Could not create your community or group');
+      sessionStorage.setItem('vila_manager_' + result.type + '_' + result.slug, result.managementToken);
       setCreated(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -79,6 +85,7 @@ export default function CreatePage() {
             <button type="button" onClick={share}>Share on WhatsApp</button>
           </div>
           {copyMessage && <p role="status" className="form-note">{copyMessage}</p>}
+          <a className="form-primary" href={'/manage/' + created.type + '/' + created.slug}>Open {created.type} details →</a>
           <a href="/" className="back-link">← Return home</a>
         </div> : <>
           <span className="mini-chip">CREATE YOUR COMMUNITY OR GROUP</span>
@@ -94,6 +101,14 @@ export default function CreatePage() {
             <input id="org-name" value={name} onChange={e=>{setName(e.target.value);setSlug(slugify(e.target.value));}} minLength={2} maxLength={120} required placeholder={type === 'community' ? 'e.g. Abuloma' : 'e.g. Abuloma Youth Association'}/>
             <label htmlFor="org-slug">INVITATION LINK NAME</label>
             <input id="org-slug" value={slug} onChange={e=>setSlug(e.target.value.toLowerCase())} required pattern="[a-z0-9]+(-[a-z0-9]+)*" minLength={2} maxLength={80} placeholder="abuloma-youth"/>
+            <label htmlFor="description">DESCRIPTION</label>
+            <textarea id="description" value={description} onChange={e=>setDescription(e.target.value)} minLength={10} maxLength={1500} required rows={4} placeholder={type === 'community' ? 'Tell people about your community and what makes it special' : 'Describe your group, its purpose, and the people it brings together'}/>
+            <div className="location-form-grid">
+              <div><label htmlFor="country">COUNTRY</label><input id="country" value={country} onChange={e=>setCountry(e.target.value)} maxLength={100} minLength={2} required placeholder="e.g. Nigeria"/></div>
+              <div><label htmlFor="state">STATE / PROVINCE</label><input id="state" value={stateProvince} onChange={e=>setStateProvince(e.target.value)} maxLength={100} minLength={2} required placeholder="e.g. Rivers State"/></div>
+            </div>
+            <label htmlFor="address">ADDRESS</label>
+            <input id="address" value={address} onChange={e=>setAddress(e.target.value)} minLength={5} maxLength={250} required placeholder="Street or community address"/>
             <div className="form-divider"/>
             <div className="mini-label">YOUR DETAILS</div>
             <p className="creator-note">We'll register you as an individual and associate your user ID with this {type} as its creator.</p>
