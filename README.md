@@ -79,3 +79,31 @@ npm start
 React runs at http://localhost:3000 and proxies `/api` to port 4000. Build each app with `npm run build` in its own folder.
 
 **Note:** The changed source files have been committed, but the build still needs to be run locally; this environment does not have npm/GitHub network access.
+
+
+## Email confirmations (SMTP)
+
+VILA sends branded HTML and plaintext confirmation emails through Nodemailer after a **successful database write**:
+
+- **Independent waitlist signup:** a welcome email to the individual.
+- **Joining by community/group invitation:** a welcome email mentioning the community or group.
+- **Creating a community or group:** an email to the creator, including their new organization's public invitation URL. This also applies when an already-signed-in creator creates another organization.
+
+Each HTML email contains the actual VILA app logo as a **CID inline image** bundled in `server/assets/vila-logo.png`; it is not dependent on a separate web image host. Emails use Tech Blue, Sunset Orange, and VILA branding. Email failures are logged and reported as `emailSent: false` in the successful API response instead of rolling back the already-created user or organization. Successful SMTP submission does not guarantee delivery to the recipient's inbox.
+
+Configure **`server/.env`** locally, using `server/.env.example` as a guide:
+
+```dotenv
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=youraddress@gmail.com
+EMAIL_PASS=your-smtp-app-password
+EMAIL_FROM="VILA <youraddress@gmail.com>"
+PUBLIC_APP_URL=https://your-public-vila-domain.example
+```
+
+With Gmail SMTP, use an app password or another supported SMTP credential; do not enter your normal Gmail login password. `PUBLIC_APP_URL` controls the absolute links inserted into emails. Using `http://localhost:3000` works for local testing but not for recipients on other devices.
+
+Run `npm install` again **from the `server/` folder** to install the new Nodemailer dependency, then `npm run dev`. The frontend does not need new dependencies.
+
+**Credential safety:** `server/.env` was previously accidentally checked into Git; it has now been removed from tracking and `server/.gitignore` ignores it. **Back up your local `server/.env` before pulling** because Git may delete the previously tracked file on pull. Recreate it afterward from the example and your private values. Rotate any real database, SMTP, or other secrets contained in the previously committed file, since removing it from the current branch does not erase Git history. Do not commit live passwords or API keys.
