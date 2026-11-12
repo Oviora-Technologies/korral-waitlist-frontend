@@ -1,14 +1,13 @@
+import { Link, useParams } from 'react-router-dom';
 import React, { useEffect, useState, type FormEvent } from 'react';
 import '../../styles/WaitlistPages.css';
 
 const API = process.env.REACT_APP_API_URL || '';
 type Organization = { name: string; type: 'community' | 'group'; slug: string };
 
-export default function JoinPage() {
-  const match = window.location.pathname.match(/^\/(c|g)\/([a-z0-9-]+)\/?$/);
-  const invitation = match
-    ? { type: match[1] === 'c' ? 'community' : 'group', slug: match[2] }
-    : null;
+export default function JoinPage({ invitationType }: { invitationType?: 'community' | 'group' }) {
+  const { slug } = useParams();
+  const invitation = invitationType && slug ? { type: invitationType, slug } : null;
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [error, setError] = useState('');
   const [name, setName] = useState('');
@@ -35,7 +34,7 @@ export default function JoinPage() {
     return () => {
       current = false;
     };
-    // Invitation only changes on a full-page navigation.
+    // App keys this page by pathname, resetting form state for each invitation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -101,9 +100,9 @@ export default function JoinPage() {
                 as launch approaches.
               </p>
               <p role='status'>{emailSent ? 'A confirmation email has been submitted for delivery to your inbox.' : 'Your registration was saved, but a confirmation email could not be sent right now.'}</p>
-              <a href='/' className='form-primary'>
+              <Link to='/' className='form-primary'>
                 Back to VILA →
-              </a>
+              </Link>
             </div>
           ) : (
             <>
@@ -129,7 +128,7 @@ export default function JoinPage() {
               )}
               {error && (
                 <div role='alert' className='form-error'>
-                  {error} {invitation && <a href='/join'>Join independently</a>}
+                  {error} {invitation && <Link to='/join'>Join independently</Link>}
                 </div>
               )}
               {!Boolean(invitation && error) && (

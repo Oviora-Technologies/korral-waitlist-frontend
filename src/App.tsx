@@ -1,3 +1,4 @@
+import { Link, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import HomePage from './features/home/HomePage';
 import JoinPage from './features/waitlist/JoinPage';
@@ -10,10 +11,11 @@ import { Header, Footer } from './components/SiteLayout';
 import './features/home/HomePage.css';
 
 export default function App() {
-  const path = window.location.pathname.replace(/\/$/, '') || '/';
-  const protectedPage =
-    path === '/dashboard' ||
-    /^\/manage\/(community|group)\/[a-z0-9-]+$/.test(path);
+  const location = useLocation();
+  const path = location.pathname;
+  const navigate = useNavigate();
+  const token = getToken();
+  const [checkedToken, setCheckedToken] = useState<string | null>(null);
   const [auth, setAuth] = useState<'checking' | 'signed-in' | 'signed-out'>(
     'checking',
   );
@@ -23,8 +25,7 @@ export default function App() {
     let active = true;
     if (!getToken()) {
       setAuth('signed-out');
-      if (protectedPage)
-        window.location.replace('/login?next=' + encodeURIComponent(path));
+      setCheckedToken(token);
       return () => {
         active = false;
       };
@@ -32,27 +33,27 @@ export default function App() {
     apiAuth('/api/auth/me')
       .then((response) => {
         if (!active) return;
+        setCheckedToken(token);
         if (response.ok) {
           setAuth('signed-in');
         } else {
           clearToken();
           setAuth('signed-out');
-          if (protectedPage)
-            window.location.replace('/login?next=' + encodeURIComponent(path));
+
         }
       })
       .catch(() => {
         if (active) {
+          setCheckedToken(token);
           // Do not treat a network failure as proof the session is valid.
           setAuth('signed-out');
-          if (protectedPage)
-            window.location.replace('/login?next=' + encodeURIComponent(path));
+
         }
       });
     return () => {
       active = false;
     };
-  }, [path, protectedPage]);
+  }, [path, token]);
 
   async function handleLogout() {
     if (loggingOut) return;
@@ -64,54 +65,53 @@ export default function App() {
     } finally {
       clearToken();
       setAuth('signed-out');
-      window.location.replace('/');
+      navigate('/', { replace: true });
     }
   }
 
-  let page: React.ReactNode;
-  if (protectedPage && auth !== 'signed-in') {
-    page = (
-      <main className='details-main' role='status'>
-        <p>
-          {auth === 'checking'
-            ? 'Checking your creator session…'
-            : 'Redirecting to login…'}
-        </p>
-      </main>
-    );
-  } else if (path === '/login') {
-    page =
-      auth === 'signed-in' ? (
-        <main className='details-main'>
-          <p>
-            You're already signed in.{' '}
-            <a href='/dashboard'>Open my communities →</a>
-          </p>
-        </main>
-      ) : (
-        <LoginPage />
-      );
-  } else if (path === '/dashboard') {
-    page = <DashboardPage />;
-  } else if (path === '/create' || path === '/admin') {
-    page = <CreatePage />;
-  } else if (/^\/manage\/(community|group)\/[a-z0-9-]+$/.test(path)) {
-    page = <CommunityDetailsPage />;
-  } else if (path === '/join' || /^\/(c|g)\/[a-z0-9-]+$/.test(path)) {
-    page = <JoinPage />;
-  } else {
-    page = <HomePage />;
+  useEffect(() => {
+    if (path === '/' && auth === 'signed-out') setLoggingOut(false);
+  }, [path, auth]);
+
+  const checking = auth === 'checking' || checkedToken !== token;
+  function protect(page: React.ReactNode) {
+    if (loggingOut) return <main role="status">Logging out…</main>;
+    if (checking) return <main className="details-main" role="status">Checking your creator session…</main>;
+    if (auth !== 'signed-in') return <Navigate replace to={'/login?next=' + encodeURIComponent(path + location.search)} />;
+    return page;
   }
+
+  useEffect(() => {
+    if (location.hash) {
+      document.getElementById(location.hash.slice(1))?.scrollIntoView();
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname, location.hash]);
 
   return (
     <div className='vila-app-layout'>
       <Header
+        key={path + location.hash}
         authenticated={auth === 'signed-in'}
-        authChecking={auth === 'checking'}
+        authChecking={checking}
         loggingOut={loggingOut}
         onLogout={handleLogout}
       />
-      {page}
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/index.html" element={<Navigate to="/" replace />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/create" element={<CreatePage />} />
+        <Route path="/admin" element={<Navigate to="/create" replace />} />
+        <Route path="/join" element={<JoinPage key={path} />} />
+        <Route path="/c/:slug" element={<JoinPage key={path} invitationType="community" />} />
+        <Route path="/g/:slug" element={<JoinPage key={path} invitationType="group" />} />
+        <Route path="/dashboard" element={protect(<DashboardPage />)} />
+        <Route path="/manage/community/:slug" element={protect(<CommunityDetailsPage key={path} type="community" />)} />
+        <Route path="/manage/group/:slug" element={protect(<CommunityDetailsPage key={path} type="group" />)} />
+        <Route path="*" element={<main className="details-main"><h1>Page not found</h1><Link to="/">Return home</Link></main>} />
+      </Routes>
       <Footer />
     </div>
   );

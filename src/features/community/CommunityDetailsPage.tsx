@@ -1,8 +1,8 @@
+import { Link, useParams, useLocation } from 'react-router-dom';
 import React, { useEffect, useMemo, useState } from 'react';
 import '../../styles/WaitlistPages.css';
 import { apiAuth, getToken } from '../auth/authClient';
 
-const API = process.env.REACT_APP_API_URL || '';
 type Details = {
   id: string;
   name: string;
@@ -22,12 +22,9 @@ type Member = {
   joinedAt: string;
 };
 
-export default function CommunityDetailsPage() {
-  const parts = window.location.pathname.match(
-    /^\/manage\/(community|group)\/([a-z0-9-]+)\/?$/,
-  );
-  const type = parts?.[1] || '';
-  const slug = parts?.[2] || '';
+export default function CommunityDetailsPage({ type }: { type: 'community' | 'group' }) {
+  const { slug = '' } = useParams();
+  const location = useLocation();
   const [details, setDetails] = useState<Details | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [error, setError] = useState('');
@@ -118,14 +115,14 @@ export default function CommunityDetailsPage() {
             <span className='mini-chip'>PRIVATE MANAGEMENT</span>
             <h2>Access unavailable</h2>
             <p>{error}</p>
-            <a
+            <Link
               className='form-primary'
-              href={
-                '/login?next=' + encodeURIComponent(window.location.pathname)
+              to={
+                '/login?next=' + encodeURIComponent(location.pathname)
               }
             >
               Sign in as creator →
-            </a>
+            </Link>
           </section>
         ) : (
           details && (

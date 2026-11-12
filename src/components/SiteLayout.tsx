@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import '../features/home/HomePage.css';
 
@@ -11,16 +12,16 @@ type HeaderProps = {
 export function Header({ authenticated, authChecking, loggingOut, onLogout }: HeaderProps) {
   const [open, setOpen] = useState(false);
   return <header className="topbar page-container">
-    <a className="wordmark" href="/" aria-label="VILA home"><img className="brand-image" src="/vila-logo.png" alt="" /><span>vila<span className="accent">.</span></span></a>
+    <Link className="wordmark" to="/" aria-label="VILA home"><img className="brand-image" src="/vila-logo.png" alt="" /><span>vila<span className="accent">.</span></span></Link>
     <nav className={open ? 'toplinks open' : 'toplinks'} aria-label="Main navigation">
-      <a href="/#why-vila">Why VILA</a>
-      <a href="/#how-it-works">How it works</a>
-      <a href="/create">Create a community or group</a>
-      {authenticated && <a href="/dashboard">My communities</a>}
+      <Link to="/#why-vila">Why VILA</Link>
+      <Link to="/#how-it-works">How it works</Link>
+      <Link to="/create">Create a community or group</Link>
+      {authenticated && <Link to="/dashboard">My communities</Link>}
       {!authChecking && (authenticated
         ? <button type="button" className="header-logout" onClick={onLogout} disabled={loggingOut}>{loggingOut ? 'Logging out…' : 'Logout'}</button>
-        : <a href="/login">Creator login</a>)}
-      <a className="top-join" href="/join">Get early access ↗</a>
+        : <Link to="/login">Creator login</Link>)}
+      <Link className="top-join" to="/join">Get early access ↗</Link>
     </nav>
     <button className="mobile-menu" type="button" onClick={() => setOpen(!open)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open}>{open ? '✕' : '☰'}</button>
   </header>;
@@ -28,7 +29,7 @@ export function Header({ authenticated, authChecking, loggingOut, onLogout }: He
 
 export function Footer() {
   return <footer className="footer page-container">
-    <a className="wordmark" href="/"><img className="brand-image" src="/vila-logo.png" alt="" /><span>vila<span className="accent">.</span></span></a>
+    <Link className="wordmark" to="/"><img className="brand-image" src="/vila-logo.png" alt="" /><span>vila<span className="accent">.</span></span></Link>
     <p>Made for the places we call home.</p>
     <span>© {new Date().getFullYear()} VILA. All rights reserved.</span>
   </footer>;

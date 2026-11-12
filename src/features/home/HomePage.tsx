@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import React from 'react';
 import './HomePage.css';
 
@@ -127,12 +128,12 @@ function HomePage() {
               home for everything that makes your community yours.
             </p>
             <div className='hero-actions'>
-              <a className='button button-blue' href='/join'>
+              <Link className='button button-blue' to='/join'>
                 Join the waitlist <Icon name='arrow' />
-              </a>
-              <a className='text-link' href='/create'>
+              </Link>
+              <Link className='text-link' to='/create'>
                 Create a community or group <Icon name='up' size={17} />
-              </a>
+              </Link>
             </div>
             <div className='launch-location'>
               <Icon name='pin' size={17} /> Beginning in Abuloma, Port Harcourt,
@@ -308,13 +309,13 @@ function HomePage() {
                 Join independently or register through an invitation from your
                 community or group.
               </p>
-              <a className='button button-blue submit-button' href='/join'>
+              <Link className='button button-blue submit-button' to='/join'>
                 Join the waitlist <Icon name='arrow' />
-              </a>
+              </Link>
               <p className='small-print'>No community or group required.</p>
-              <a className='create-group-link' href='/create'>
+              <Link className='create-group-link' to='/create'>
                 Organizing a community or group? Create an invite link →
-              </a>
+              </Link>
             </div>
           </div>
         </section>

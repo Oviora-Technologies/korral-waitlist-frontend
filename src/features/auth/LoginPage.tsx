@@ -1,8 +1,11 @@
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import React, { useState, type FormEvent } from 'react';
 import { API, setToken } from './authClient';
 import '../../styles/WaitlistPages.css';
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,11 +24,12 @@ export default function LoginPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Unable to sign in');
       setToken(data.token);
-      const target = new URLSearchParams(window.location.search).get('next');
-      window.location.assign(
-        target && target.startsWith('/') && !target.startsWith('//')
+      const target = searchParams.get('next');
+      navigate(
+        target && target.startsWith('/') && !target.startsWith('//') && !target.includes('\\')
           ? target
           : '/dashboard',
+        { replace: true },
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to log in');
@@ -84,7 +88,7 @@ export default function LoginPage() {
           </button>
         </form>
         <p className='form-note'>
-          <a href='/create'>New here? Create a community or group.</a>
+          <Link to='/create'>New here? Create a community or group.</Link>
         </p>
       </section>
     </main>

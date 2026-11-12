@@ -1,3 +1,4 @@
+import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { apiAuth } from './authClient';
 import '../../styles/WaitlistPages.css';
@@ -10,6 +11,7 @@ type Org = {
   location?: { country: string; stateProvince: string; address: string };
 };
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [user, setUser] = useState<{ name: string; email: string } | null>(
     null,
@@ -20,7 +22,7 @@ export default function DashboardPage() {
     apiAuth('/api/auth/me')
       .then(async (r) => {
         if (r.status === 401) {
-          window.location.replace('/login?next=%2Fdashboard');
+          navigate('/login?next=%2Fdashboard', { replace: true });
           return;
         }
         if (!r.ok) throw new Error('Unable to load your dashboard');
@@ -30,7 +32,7 @@ export default function DashboardPage() {
       })
       .catch((e) => setError(e.message))
       .finally(() => setBusy(false));
-  }, []);
+  }, [navigate]);
   function invite(o: Org) {
     return (
       window.location.origin +
@@ -52,9 +54,9 @@ export default function DashboardPage() {
               : 'Manage your communities and groups.'}
           </p>
         </div>
-        <a className='dashboard-heading-link' href='/create'>
+        <Link className='dashboard-heading-link' to='/create'>
           Create community or group →
-        </a>
+        </Link>
       </div>
       {busy ? (
         <p>Loading your communities…</p>
@@ -66,9 +68,9 @@ export default function DashboardPage() {
         <>
           <div className='dashboard-toolbar'>
             <strong>{orgs.length} created</strong>
-            <a className='form-primary' href='/create'>
+            <Link className='form-primary' to='/create'>
               Create another →
-            </a>
+            </Link>
           </div>
           <div className='dashboard-org-grid'>
             {orgs.map((o) => (
@@ -81,12 +83,12 @@ export default function DashboardPage() {
                     .filter(Boolean)
                     .join(', ')}
                 </small>
-                <a
+                <Link
                   className='form-primary'
-                  href={'/manage/' + o.type + '/' + o.slug}
+                  to={'/manage/' + o.type + '/' + o.slug}
                 >
                   Open details →
-                </a>
+                </Link>
                 <a
                   className='dashboard-invite'
                   href={invite(o)}
@@ -102,9 +104,9 @@ export default function DashboardPage() {
             <section className='details-panel'>
               <h2>Nothing here yet.</h2>
               <p>Create your first community or group to get started.</p>
-              <a href='/create' className='form-primary'>
+              <Link to='/create' className='form-primary'>
                 Create now →
-              </a>
+              </Link>
             </section>
           )}
         </>

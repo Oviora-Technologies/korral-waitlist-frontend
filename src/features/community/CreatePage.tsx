@@ -1,3 +1,4 @@
+import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState, type FormEvent } from 'react';
 import '../../styles/WaitlistPages.css';
 import { setToken, getToken, apiAuth } from '../auth/authClient';
@@ -21,6 +22,7 @@ const slugify = (name: string) =>
     .replace(/^-|-$/g, '');
 
 export default function CreatePage() {
+  const navigate = useNavigate();
   const [type, setType] = useState<'community' | 'group'>('community');
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
@@ -95,7 +97,7 @@ export default function CreatePage() {
       setToken(result.sessionToken);
       sessionStorage.setItem('vila_last_creation_email_status', result.emailSent === true ? 'accepted' : 'failed');
       setCreated(result);
-      window.location.assign('/manage/' + result.type + '/' + result.slug);
+      navigate('/manage/' + result.type + '/' + result.slug);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -168,15 +170,15 @@ export default function CreatePage() {
                   {copyMessage}
                 </p>
               )}
-              <a
+              <Link
                 className='form-primary'
-                href={'/manage/' + created.type + '/' + created.slug}
+                to={'/manage/' + created.type + '/' + created.slug}
               >
                 Open {created.type} details →
-              </a>
-              <a href='/' className='back-link'>
+              </Link>
+              <Link to='/' className='back-link'>
                 ← Return home
-              </a>
+              </Link>
             </div>
           ) : (
             <>
@@ -391,11 +393,11 @@ export default function CreatePage() {
               </form>
               <small>
                 {returning ? (
-                  <a href='/dashboard'>Back to my communities</a>
+                  <Link to='/dashboard'>Back to my communities</Link>
                 ) : (
                   <span>
                     Already created a community or group?{' '}
-                    <a href='/login'>Sign in to your creator dashboard</a>.
+                    <Link to='/login'>Sign in to your creator dashboard</Link>.
                   </span>
                 )}
               </small>
