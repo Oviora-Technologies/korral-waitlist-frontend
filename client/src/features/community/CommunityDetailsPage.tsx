@@ -142,14 +142,14 @@ export default function CommunityDetailsPage() {
               </div>
               {creationEmailStatus === 'failed' && (
                 <p role='status' className='form-error'>
-                  Your organization was created successfully, but the confirmation email could not be sent. Check your SMTP configuration or contact VILA support.
+                  Your organization was created successfully, but the confirmation email could not be sent. Something went wrong!.
                 </p>
               )}
-              {creationEmailStatus === 'accepted' && (
+              {/* {creationEmailStatus === 'accepted' && (
                 <p role='status' className='form-note'>
                   Your organization was created. The confirmation email was accepted by the mail server; check your inbox or spam folder.
                 </p>
-              )}
+              )} */}
               <div className='details-metrics'>
                 <article>
                   <span>Registered people</span>
