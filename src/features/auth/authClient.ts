@@ -1,5 +1,5 @@
 export const API = process.env.REACT_APP_API_URL || '';
-const key = 'vila_creator_session';
+const key = 'korral_creator_session';
 export function getToken() {
   return sessionStorage.getItem(key) || '';
 }

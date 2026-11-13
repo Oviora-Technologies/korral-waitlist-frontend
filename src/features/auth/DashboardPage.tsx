@@ -46,7 +46,7 @@ export default function DashboardPage() {
     <main className='details-main'>
       <div className='details-heading'>
         <div>
-          <span className='mini-label'>VILA · CREATOR DASHBOARD</span>
+          <span className='mini-label'>korral · CREATOR DASHBOARD</span>
           <h1>My communities & groups</h1>
           <p>
             {user

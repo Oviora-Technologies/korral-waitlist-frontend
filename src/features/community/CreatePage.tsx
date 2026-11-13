@@ -96,7 +96,10 @@ export default function CreatePage() {
           result.error || 'Could not create your community or group',
         );
       setToken(result.sessionToken);
-      sessionStorage.setItem('vila_last_creation_email_status', result.emailSent === true ? 'accepted' : 'failed');
+      sessionStorage.setItem(
+        'korral_last_creation_email_status',
+        result.emailSent === true ? 'accepted' : 'failed',
+      );
       setCreated(result);
       navigate('/manage/' + result.type + '/' + result.slug);
     } catch (err) {
@@ -115,7 +118,7 @@ export default function CreatePage() {
   }
   function share() {
     const message =
-      'Join ' + created?.name + ' on the VILA waitlist: ' + invitationUrl;
+      'Join ' + created?.name + ' on the korral waitlist: ' + invitationUrl;
     window.open(
       'https://wa.me/?text=' + encodeURIComponent(message),
       '_blank',
@@ -126,12 +129,12 @@ export default function CreatePage() {
     <div className='waitlist-screen'>
       <main className='waitlist-main'>
         <div className='waitlist-story'>
-          <div className='mini-label'>VILA · COMMUNITY FIRST</div>
+          <div className='mini-label'>korral · COMMUNITY FIRST</div>
           <h1>
             Bring your people <em>together.</em>
           </h1>
           <p>
-            Create a place for your community or group on the VILA waitlist.
+            Create a place for your community or group on the korral waitlist.
             You'll be registered as an individual and linked as its creator.
           </p>
           <div className='invite-marker'>
@@ -148,7 +151,7 @@ export default function CreatePage() {
               </span>
               <h2>{created.name}</h2>
               <p>
-                You're registered on VILA as an individual. Your user ID is
+                You're registered on korral as an individual. Your user ID is
                 linked to this {created.type} as its administrator, pending
                 identity verification.
               </p>
@@ -351,7 +354,6 @@ export default function CreatePage() {
                       id='password'
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-
                       autoComplete='new-password'
                       minLength={12}
                       maxLength={128}
@@ -364,7 +366,6 @@ export default function CreatePage() {
                       visibilityLabel='confirm password'
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-
                       autoComplete='new-password'
                       minLength={12}
                       maxLength={128}
@@ -381,7 +382,7 @@ export default function CreatePage() {
                     required
                   />
                   <span>
-                    I agree to receive VILA waitlist and launch updates.
+                    I agree to receive korral waitlist and launch updates.
                   </span>
                 </label>
                 {error && (

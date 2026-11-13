@@ -5,9 +5,14 @@ import '../../styles/WaitlistPages.css';
 const API = process.env.REACT_APP_API_URL || '';
 type Organization = { name: string; type: 'community' | 'group'; slug: string };
 
-export default function JoinPage({ invitationType }: { invitationType?: 'community' | 'group' }) {
+export default function JoinPage({
+  invitationType,
+}: {
+  invitationType?: 'community' | 'group';
+}) {
   const { slug } = useParams();
-  const invitation = invitationType && slug ? { type: invitationType, slug } : null;
+  const invitation =
+    invitationType && slug ? { type: invitationType, slug } : null;
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [error, setError] = useState('');
   const [name, setName] = useState('');
@@ -75,7 +80,7 @@ export default function JoinPage({ invitationType }: { invitationType?: 'communi
     <div className='waitlist-screen'>
       <main className='waitlist-main'>
         <div className='waitlist-story'>
-          <div className='mini-label'>VILA · EARLY ACCESS</div>
+          <div className='mini-label'>korral · EARLY ACCESS</div>
           <h1>
             Something good starts <em>here.</em>
           </h1>
@@ -96,12 +101,16 @@ export default function JoinPage({ invitationType }: { invitationType?: 'communi
               <div className='success-mark'>✓</div>
               <h2>You're on the list!</h2>
               <p>
-                Thanks for being part of VILA's beginning. We'll share updates
+                Thanks for being part of korral's beginning. We'll share updates
                 as launch approaches.
               </p>
-              <p role='status'>{emailSent ? 'A confirmation email has been submitted for delivery to your inbox.' : 'Your registration was saved, but a confirmation email could not be sent right now.'}</p>
+              <p role='status'>
+                {emailSent
+                  ? 'A confirmation email has been submitted for delivery to your inbox.'
+                  : 'Your registration was saved, but a confirmation email could not be sent right now.'}
+              </p>
               <Link to='/' className='form-primary'>
-                Back to VILA →
+                Back to korral →
               </Link>
             </div>
           ) : (
@@ -128,7 +137,8 @@ export default function JoinPage({ invitationType }: { invitationType?: 'communi
               )}
               {error && (
                 <div role='alert' className='form-error'>
-                  {error} {invitation && <Link to='/join'>Join independently</Link>}
+                  {error}{' '}
+                  {invitation && <Link to='/join'>Join independently</Link>}
                 </div>
               )}
               {!Boolean(invitation && error) && (
@@ -162,7 +172,7 @@ export default function JoinPage({ invitationType }: { invitationType?: 'communi
                       onChange={(e) => setConsent(e.target.checked)}
                     />{' '}
                     <span>
-                      I agree to receive VILA waitlist and launch updates via
+                      I agree to receive korral waitlist and launch updates via
                       email.
                     </span>
                   </label>

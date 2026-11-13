@@ -27,7 +27,10 @@ export default function LoginPage() {
       setToken(data.token);
       const target = searchParams.get('next');
       navigate(
-        target && target.startsWith('/') && !target.startsWith('//') && !target.includes('\\')
+        target &&
+          target.startsWith('/') &&
+          !target.startsWith('//') &&
+          !target.includes('\\')
           ? target
           : '/dashboard',
         { replace: true },
@@ -41,7 +44,7 @@ export default function LoginPage() {
   return (
     <main className='waitlist-main'>
       <section className='waitlist-story'>
-        <div className='mini-label'>VILA · WELCOME BACK</div>
+        <div className='mini-label'>korral · WELCOME BACK</div>
         <h1>
           Your people, <em>one place.</em>
         </h1>
@@ -72,7 +75,6 @@ export default function LoginPage() {
           <label htmlFor='login-password'>PASSWORD</label>
           <PasswordInput
             id='login-password'
-
             autoComplete='current-password'
             required
             value={password}

@@ -109,7 +109,7 @@ const features = [
 ];
 function HomePage() {
   return (
-    <div className='vila-page'>
+    <div className='korral-page'>
       <main>
         <section className='hero page-container'>
           <div className='hero-content'>
@@ -124,7 +124,7 @@ function HomePage() {
               <em>connected.</em>
             </h1>
             <p className='hero-description'>
-              The best things happen when we come together. Meet VILA — a new
+              The best things happen when we come together. Meet korral — a new
               home for everything that makes your community yours.
             </p>
             <div className='hero-actions'>
@@ -180,7 +180,7 @@ function HomePage() {
             </div>
           </div>
         </section>
-        <div className='marquee-band' aria-label='VILA values'>
+        <div className='marquee-band' aria-label='korral values'>
           <div className='marquee-inner'>
             <span>DISCOVER</span>
             <i>✳</i>
@@ -197,7 +197,7 @@ function HomePage() {
             <span>CONNECT</span>
           </div>
         </div>
-        <section id='why-vila' className='features-section'>
+        <section id='why-korral' className='features-section'>
           <div className='page-container'>
             <div className='section-heading'>
               <div>
@@ -212,7 +212,7 @@ function HomePage() {
               </div>
               <p>
                 From the little everyday things to the moments that make a
-                difference, VILA brings your community together.
+                difference, korral brings your community together.
               </p>
             </div>
             <div className='feature-grid'>
@@ -273,7 +273,7 @@ function HomePage() {
                 <b>03</b>
                 <span>
                   <strong>Be first to know</strong>
-                  <small>We'll share the good news when VILA is ready.</small>
+                  <small>We'll share the good news when korral is ready.</small>
                 </span>
               </div>
             </div>
@@ -302,7 +302,7 @@ function HomePage() {
             <div className='signup-panel'>
               <div className='panel-heading'>
                 <span className='pill'>EARLY ACCESS</span>
-                <span className='panel-count'>VILA / 001</span>
+                <span className='panel-count'>korral / 001</span>
               </div>
               <h3>Your spot is waiting.</h3>
               <p className='panel-description'>

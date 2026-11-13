@@ -1,4 +1,11 @@
-import { Link, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Link,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import HomePage from './features/home/HomePage';
 import JoinPage from './features/waitlist/JoinPage';
@@ -39,7 +46,6 @@ export default function App() {
         } else {
           clearToken();
           setAuth('signed-out');
-
         }
       })
       .catch(() => {
@@ -47,7 +53,6 @@ export default function App() {
           setCheckedToken(token);
           // Do not treat a network failure as proof the session is valid.
           setAuth('signed-out');
-
         }
       });
     return () => {
@@ -75,9 +80,20 @@ export default function App() {
 
   const checking = auth === 'checking' || checkedToken !== token;
   function protect(page: React.ReactNode) {
-    if (loggingOut) return <main role="status">Logging out…</main>;
-    if (checking) return <main className="details-main" role="status">Checking your creator session…</main>;
-    if (auth !== 'signed-in') return <Navigate replace to={'/login?next=' + encodeURIComponent(path + location.search)} />;
+    if (loggingOut) return <main role='status'>Logging out…</main>;
+    if (checking)
+      return (
+        <main className='details-main' role='status'>
+          Checking your creator session…
+        </main>
+      );
+    if (auth !== 'signed-in')
+      return (
+        <Navigate
+          replace
+          to={'/login?next=' + encodeURIComponent(path + location.search)}
+        />
+      );
     return page;
   }
 
@@ -90,7 +106,7 @@ export default function App() {
   }, [location.pathname, location.hash]);
 
   return (
-    <div className='vila-app-layout'>
+    <div className='korral-app-layout'>
       <Header
         key={path + location.hash}
         authenticated={auth === 'signed-in'}
@@ -99,18 +115,40 @@ export default function App() {
         onLogout={handleLogout}
       />
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/index.html" element={<Navigate to="/" replace />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/create" element={<CreatePage />} />
-        <Route path="/admin" element={<Navigate to="/create" replace />} />
-        <Route path="/join" element={<JoinPage key={path} />} />
-        <Route path="/c/:slug" element={<JoinPage key={path} invitationType="community" />} />
-        <Route path="/g/:slug" element={<JoinPage key={path} invitationType="group" />} />
-        <Route path="/dashboard" element={protect(<DashboardPage />)} />
-        <Route path="/manage/community/:slug" element={protect(<CommunityDetailsPage key={path} type="community" />)} />
-        <Route path="/manage/group/:slug" element={protect(<CommunityDetailsPage key={path} type="group" />)} />
-        <Route path="*" element={<main className="details-main"><h1>Page not found</h1><Link to="/">Return home</Link></main>} />
+        <Route path='/' element={<HomePage />} />
+        <Route path='/index.html' element={<Navigate to='/' replace />} />
+        <Route path='/login' element={<LoginPage />} />
+        <Route path='/create' element={<CreatePage />} />
+        <Route path='/admin' element={<Navigate to='/create' replace />} />
+        <Route path='/join' element={<JoinPage key={path} />} />
+        <Route
+          path='/c/:slug'
+          element={<JoinPage key={path} invitationType='community' />}
+        />
+        <Route
+          path='/g/:slug'
+          element={<JoinPage key={path} invitationType='group' />}
+        />
+        <Route path='/dashboard' element={protect(<DashboardPage />)} />
+        <Route
+          path='/manage/community/:slug'
+          element={protect(
+            <CommunityDetailsPage key={path} type='community' />,
+          )}
+        />
+        <Route
+          path='/manage/group/:slug'
+          element={protect(<CommunityDetailsPage key={path} type='group' />)}
+        />
+        <Route
+          path='*'
+          element={
+            <main className='details-main'>
+              <h1>Page not found</h1>
+              <Link to='/'>Return home</Link>
+            </main>
+          }
+        />
       </Routes>
       <Footer />
     </div>

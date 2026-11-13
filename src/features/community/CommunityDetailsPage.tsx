@@ -22,7 +22,11 @@ type Member = {
   joinedAt: string;
 };
 
-export default function CommunityDetailsPage({ type }: { type: 'community' | 'group' }) {
+export default function CommunityDetailsPage({
+  type,
+}: {
+  type: 'community' | 'group';
+}) {
   const { slug = '' } = useParams();
   const location = useLocation();
   const [details, setDetails] = useState<Details | null>(null);
@@ -32,8 +36,8 @@ export default function CommunityDetailsPage({ type }: { type: 'community' | 'gr
   const [search, setSearch] = useState('');
   const [message, setMessage] = useState('');
   const [creationEmailStatus] = useState(() => {
-    const status = sessionStorage.getItem('vila_last_creation_email_status');
-    sessionStorage.removeItem('vila_last_creation_email_status');
+    const status = sessionStorage.getItem('korral_last_creation_email_status');
+    sessionStorage.removeItem('korral_last_creation_email_status');
     return status;
   });
 
@@ -99,7 +103,7 @@ export default function CommunityDetailsPage({ type }: { type: 'community' | 'gr
     window.open(
       'https://wa.me/?text=' +
         encodeURIComponent(
-          'Join ' + details?.name + ' on the VILA waitlist: ' + inviteUrl,
+          'Join ' + details?.name + ' on the korral waitlist: ' + inviteUrl,
         ),
       '_blank',
       'noopener,noreferrer',
@@ -117,9 +121,7 @@ export default function CommunityDetailsPage({ type }: { type: 'community' | 'gr
             <p>{error}</p>
             <Link
               className='form-primary'
-              to={
-                '/login?next=' + encodeURIComponent(location.pathname)
-              }
+              to={'/login?next=' + encodeURIComponent(location.pathname)}
             >
               Sign in as creator →
             </Link>
@@ -130,7 +132,7 @@ export default function CommunityDetailsPage({ type }: { type: 'community' | 'gr
               <div className='details-heading'>
                 <div>
                   <span className='mini-label'>
-                    VILA / {details.type.toUpperCase()} DETAILS
+                    korral / {details.type.toUpperCase()} DETAILS
                   </span>
                   <h1>{details.name}</h1>
                   <p>Manage your invitation and see who has registered.</p>
@@ -139,7 +141,8 @@ export default function CommunityDetailsPage({ type }: { type: 'community' | 'gr
               </div>
               {creationEmailStatus === 'failed' && (
                 <p role='status' className='form-error'>
-                  Your organization was created successfully, but the confirmation email could not be sent. Something went wrong!.
+                  Your organization was created successfully, but the
+                  confirmation email could not be sent. Something went wrong!.
                 </p>
               )}
               {/* {creationEmailStatus === 'accepted' && (
