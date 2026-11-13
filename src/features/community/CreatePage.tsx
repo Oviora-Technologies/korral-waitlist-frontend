@@ -1,3 +1,4 @@
+import PasswordInput from '../../components/PasswordInput';
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState, type FormEvent } from 'react';
 import '../../styles/WaitlistPages.css';
@@ -346,11 +347,11 @@ export default function CreatePage() {
                       placeholder='+1 234 567 8901'
                     />
                     <label htmlFor='password'>CREATE PASSWORD</label>
-                    <input
+                    <PasswordInput
                       id='password'
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      type='password'
+
                       autoComplete='new-password'
                       minLength={12}
                       maxLength={128}
@@ -358,11 +359,12 @@ export default function CreatePage() {
                       placeholder='At least 12 characters'
                     />
                     <label htmlFor='confirm-password'>CONFIRM PASSWORD</label>
-                    <input
+                    <PasswordInput
                       id='confirm-password'
+                      visibilityLabel='confirm password'
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      type='password'
+
                       autoComplete='new-password'
                       minLength={12}
                       maxLength={128}

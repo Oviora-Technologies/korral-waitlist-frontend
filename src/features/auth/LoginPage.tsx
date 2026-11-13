@@ -1,3 +1,4 @@
+import PasswordInput from '../../components/PasswordInput';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import React, { useState, type FormEvent } from 'react';
 import { API, setToken } from './authClient';
@@ -69,9 +70,9 @@ export default function LoginPage() {
             placeholder='you@example.com'
           />
           <label htmlFor='login-password'>PASSWORD</label>
-          <input
+          <PasswordInput
             id='login-password'
-            type='password'
+
             autoComplete='current-password'
             required
             value={password}
