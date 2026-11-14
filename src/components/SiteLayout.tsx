@@ -19,7 +19,7 @@ export function Header({
   return (
     <header className='topbar page-container'>
       <Link className='wordmark' to='/' aria-label='korral home'>
-        <img className='brand-image' src='/korral-logo.png' alt='' />
+        <img className='brand-image' src={process.env.PUBLIC_URL + '/korral-logo.png'} alt='' />
         <span>
           korral<span className='accent'>.</span>
         </span>
@@ -66,7 +66,7 @@ export function Footer() {
   return (
     <footer className='footer page-container'>
       <Link className='wordmark' to='/'>
-        <img className='brand-image' src='/korral-logo.png' alt='' />
+        <img className='brand-image' src={process.env.PUBLIC_URL + '/korral-logo.png'} alt='' />
         <span>
           korral<span className='accent'>.</span>
         </span>

@@ -58,7 +58,7 @@ export default function CreatePage() {
 
   const invitationUrl = created
     ? window.location.origin +
-      '/' +
+      '/waitlist/' +
       (created.type === 'community' ? 'c' : 'g') +
       '/' +
       created.slug

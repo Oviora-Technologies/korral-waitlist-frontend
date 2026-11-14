@@ -43,7 +43,7 @@ export default function CommunityDetailsPage({
 
   const inviteUrl =
     window.location.origin +
-    '/' +
+    '/waitlist/' +
     (type === 'community' ? 'c' : 'g') +
     '/' +
     slug;

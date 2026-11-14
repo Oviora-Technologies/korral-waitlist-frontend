@@ -28,6 +28,11 @@
       content="korral brings communities closer. Join the waitlist for a new home for your neighborhood."
     />
     <title>korral — A little closer. A lot more connected.</title>
+    <script>
+      if (window.location.hostname === 'villa-waitlist-frontend.onrender.com') {
+        window.location.replace('https://www.korral-app.com/waitlist' + window.location.pathname + window.location.search + window.location.hash);
+      }
+    </script>
   </head>
   <body>
     <noscript>JavaScript is required to use this website.</noscript>

@@ -36,7 +36,7 @@ export default function DashboardPage() {
   function invite(o: Org) {
     return (
       window.location.origin +
-      '/' +
+      '/waitlist/' +
       (o.type === 'community' ? 'c' : 'g') +
       '/' +
       o.slug
